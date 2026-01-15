@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
-
+﻿"use client";
+import React, { useState } from "react";
 interface ReportFormProps {
-  onSubmit: (report: { tool: string; status: string; speed: number; country: string }) => void;
+  onSubmit: (report: {
+    tool: string;
+    status: string;
+    speed: number;
+    country: string;
+  }) => void;
 }
-
 export function ReportForm({ onSubmit }: ReportFormProps) {
-  const [tool, setTool] = useState('');
-  const [status, setStatus] = useState('');
-  const [speed, setSpeed] = useState('');
-
+  const [tool, setTool] = useState("");
+  const [status, setStatus] = useState("");
+  const [speed, setSpeed] = useState("");
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (tool && status && speed) {
@@ -16,21 +19,24 @@ export function ReportForm({ onSubmit }: ReportFormProps) {
         tool,
         status,
         speed: parseFloat(speed),
-        country: 'User Report',
+        country: "User Report",
       });
-      setTool('');
-      setStatus('');
-      setSpeed('');
-      alert('✅ Report submitted successfully!');
+      setTool("");
+      setStatus("");
+      setSpeed("");
+      alert("✅ Report submitted successfully!");
     }
   };
-
   return (
     <div className="bg-gray-100 rounded-lg p-6 mt-8">
-      <h2 className="text-xl font-bold mb-4 text-gray-800">Submit Threat Report</h2>
+      <h2 className="text-xl font-bold mb-4 text-gray-800">
+        Submit Threat Report
+      </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Tool Name</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Tool Name
+          </label>
           <input
             type="text"
             value={tool}
@@ -41,7 +47,9 @@ export function ReportForm({ onSubmit }: ReportFormProps) {
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Status
+          </label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
@@ -55,7 +63,9 @@ export function ReportForm({ onSubmit }: ReportFormProps) {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Speed (Mbps)</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Speed (Mbps)
+          </label>
           <input
             type="number"
             value={speed}
