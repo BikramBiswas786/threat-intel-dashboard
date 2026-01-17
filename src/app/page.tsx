@@ -1,19 +1,42 @@
 ﻿// src/app/page.tsx
 'use client';
 
-import { useState } from 'react';
-import { TOOLS, COUNTRIES, generateDemoData } from '../data/tools';
+import { useState, useEffect } from 'react';
+import { TOOLS, COUNTRIES } from '../data/tools';
 
 export default function Home() {
   const [selectedCountry, setSelectedCountry] = useState('IR');
   const [selectedTool, setSelectedTool] = useState<number | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [tools, setTools] = useState(TOOLS);
+  const [loading, setLoading] = useState(false);
 
-  // Get demo data for selected country and tools
-  const toolsData = TOOLS.map(tool => ({
-    ...tool,
-    metrics: generateDemoData(tool.id, selectedCountry)
-  }));
+  // Fetch real API data instead of demo data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/reports/latest?country=${selectedCountry}`);
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          setTools(data);
+        } else {
+          setTools(TOOLS); // Fallback to demo if API fails
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setTools(TOOLS); // Fallback to demo if API fails
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [selectedCountry]);
+
+  // Use fetched data
+  const toolsData = tools;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white p-6">
@@ -72,89 +95,100 @@ export default function Home() {
             Tools Status in {COUNTRIES.find(c => c.code === selectedCountry)?.name}
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {toolsData.map(tool => (
-              <div
-                key={tool.id}
-                className="p-6 bg-white/5 backdrop-blur-xl rounded-2xl border border-cyan-500/20 hover:border-cyan-400 hover:scale-105 transition-all duration-300 relative overflow-hidden group"
-              >
-                {/* Gradient hover effect */}
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-                
-                {/* Header */}
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-cyan-400 mb-1">
-                      {tool.name}
-                    </h3>
-                    <span className="text-xs px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full">
-                      {tool.category}
-                    </span>
-                  </div>
-                  {tool.priority === 1 && (
-                    <span className="text-2xl">⭐</span>
-                  )}
-                </div>
-
-                {/* Status Badge */}
-                <div className={`inline-block px-4 py-2 rounded-lg font-semibold mb-4 ${
-                  tool.metrics.status === 'working' ? 'bg-green-500/20 text-green-400' :
-                  tool.metrics.status === 'slow' ? 'bg-yellow-500/20 text-yellow-400' :
-                  'bg-red-500/20 text-red-400'
-                }`}>
-                  {tool.metrics.status === 'working' && '✅ Working'}
-                  {tool.metrics.status === 'slow' && '⚠️ Slow'}
-                  {tool.metrics.status === 'blocked' && '❌ Blocked'}
-                </div>
-
-                {/* Metrics */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-cyan-400">
-                      {tool.metrics.speed.toFixed(1)}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="inline-block">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
+                <p className="mt-4 text-gray-400">Loading threat intelligence...</p>
+              </div>
+            </div>
+          )}
+          
+          {!loading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {toolsData.map(tool => (
+                <div
+                  key={tool.id}
+                  className="p-6 bg-white/5 backdrop-blur-xl rounded-2xl border border-cyan-500/20 hover:border-cyan-400 hover:scale-105 transition-all duration-300 relative overflow-hidden group"
+                >
+                  {/* Gradient hover effect */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                  
+                  {/* Header */}
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-cyan-400 mb-1">
+                        {tool.name}
+                      </h3>
+                      <span className="text-xs px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full">
+                        {tool.category}
+                      </span>
                     </div>
-                    <div className="text-xs text-gray-400">Mbps</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-cyan-400">
-                      {tool.metrics.confidence}%
-                    </div>
-                    <div className="text-xs text-gray-400">Confidence</div>
-                  </div>
-                </div>
-
-                {/* Prediction */}
-                <div className="mb-4 p-3 bg-orange-500/10 rounded-lg">
-                  <div className="text-xs text-gray-400 mb-1">Prediction</div>
-                  <div className="text-sm text-orange-400">
-                    ⚠️ {tool.metrics.daysUntilBlock} days until blocking
-                  </div>
-                </div>
-
-                {/* Price & Buy Button */}
-                {tool.price && tool.price > 0 && (
-                  <div className="mt-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-400 text-sm">Price:</span>
-                      <span className="text-cyan-400 font-bold">${tool.price}/month</span>
-                    </div>
-                    {tool.acceptsMonero && (
-                      <button
-                        onClick={() => {
-                          setSelectedTool(tool.id);
-                          setShowPaymentModal(true);
-                        }}
-                        className="w-full py-3 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-black font-bold rounded-lg transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
-                      >
-                        <span>💰</span>
-                        Pay with Monero (XMR)
-                      </button>
+                    {tool.priority === 1 && (
+                      <span className="text-2xl">⭐</span>
                     )}
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
+
+                  {/* Status Badge */}
+                  <div className={`inline-block px-4 py-2 rounded-lg font-semibold mb-4 ${
+                    tool.metrics.status === 'working' ? 'bg-green-500/20 text-green-400' :
+                    tool.metrics.status === 'slow' ? 'bg-yellow-500/20 text-yellow-400' :
+                    'bg-red-500/20 text-red-400'
+                  }`}>
+                    {tool.metrics.status === 'working' && '✅ Working'}
+                    {tool.metrics.status === 'slow' && '⚠️ Slow'}
+                    {tool.metrics.status === 'blocked' && '❌ Blocked'}
+                  </div>
+
+                  {/* Metrics */}
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-cyan-400">
+                        {tool.metrics.speed.toFixed(1)}
+                      </div>
+                      <div className="text-xs text-gray-400">Mbps</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-cyan-400">
+                        {tool.metrics.confidence}%
+                      </div>
+                      <div className="text-xs text-gray-400">Confidence</div>
+                    </div>
+                  </div>
+
+                  {/* Prediction */}
+                  <div className="mb-4 p-3 bg-orange-500/10 rounded-lg">
+                    <div className="text-xs text-gray-400 mb-1">Prediction</div>
+                    <div className="text-sm text-orange-400">
+                      ⚠️ {tool.metrics.daysUntilBlock} days until blocking
+                    </div>
+                  </div>
+
+                  {/* Price & Buy Button */}
+                  {tool.price && tool.price > 0 && (
+                    <div className="mt-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-400 text-sm">Price:</span>
+                        <span className="text-cyan-400 font-bold">${tool.price}/month</span>
+                      </div>
+                      {tool.acceptsMonero && (
+                        <button
+                          onClick={() => {
+                            setSelectedTool(tool.id);
+                            setShowPaymentModal(true);
+                          }}
+                          className="w-full py-3 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-black font-bold rounded-lg transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
+                        >
+                          <span>💰</span>
+                          Pay with Monero (XMR)
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
