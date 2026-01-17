@@ -1,22 +1,55 @@
 // @ts-nocheck
 "use client";
-import React, { useState } from "react";
-
-const TOOLS = {
-  NYM: { name: "NYM VPN", cat: "Mixnet", IR: { s: "WORKING", sp: 6.5, c: 87, r: 234 }, CN: { s: "SLOW", sp: 2.8, c: 71, r: 156 }, RU: { s: "WORKING", sp: 7.2, c: 89, r: 298 }, VE: { s: "WORKING", sp: 5.9, c: 82, r: 167 }, BY: { s: "WORKING", sp: 6.8, c: 85, r: 201 }, p: { d: 180, c: 58, r: "LOW" } },
-  TOR: { name: "Tor Browser", cat: "Anonymity", IR: { s: "WORKING", sp: 3.2, c: 98, r: 1234 }, CN: { s: "BLOCKED", sp: 0, c: 95, r: 892 }, RU: { s: "WORKING", sp: 2.9, c: 96, r: 1045 }, VE: { s: "WORKING", sp: 3.5, c: 97, r: 678 }, BY: { s: "WORKING", sp: 3.1, c: 94, r: 523 }, p: { d: -1, c: 100, r: "NEVER" } },
-  MULLVAD: { name: "Mullvad VPN", cat: "Commercial", IR: { s: "WORKING", sp: 8.5, c: 94, r: 892 }, CN: { s: "BLOCKED", sp: 0, c: 91, r: 567 }, RU: { s: "SLOW", sp: 2.3, c: 85, r: 423 }, VE: { s: "WORKING", sp: 7.8, c: 88, r: 345 }, BY: { s: "WORKING", sp: 8.2, c: 90, r: 456 }, p: { d: 45, c: 82, r: "MEDIUM" } },
-  PROTON: { name: "ProtonVPN", cat: "Commercial", IR: { s: "BLOCKED", sp: 0, c: 94, r: 612 }, CN: { s: "BLOCKED", sp: 0, c: 96, r: 734 }, RU: { s: "SLOW", sp: 1.8, c: 78, r: 389 }, VE: { s: "WORKING", sp: 6.5, c: 85, r: 298 }, BY: { s: "SLOW", sp: 2.4, c: 81, r: 334 }, p: { d: 35, c: 72, r: "MEDIUM" } },
-  EXPRESS: { name: "ExpressVPN", cat: "Commercial", IR: { s: "SLOW", sp: 2.1, c: 76, r: 567 }, CN: { s: "BLOCKED", sp: 0, c: 93, r: 823 }, RU: { s: "SLOW", sp: 1.9, c: 74, r: 445 }, VE: { s: "WORKING", sp: 7.2, c: 82, r: 356 }, BY: { s: "SLOW", sp: 2.3, c: 77, r: 289 }, p: { d: 21, c: 85, r: "HIGH" } },
-  NORD: { name: "NordVPN", cat: "Commercial", IR: { s: "SLOW", sp: 1.5, c: 71, r: 423 }, CN: { s: "BLOCKED", sp: 0, c: 89, r: 678 }, RU: { s: "SLOW", sp: 1.7, c: 73, r: 389 }, VE: { s: "WORKING", sp: 6.8, c: 80, r: 298 }, BY: { s: "SLOW", sp: 2.1, c: 75, r: 267 }, p: { d: 28, c: 78, r: "MEDIUM" } },
-  PSIPHON: { name: "Psiphon", cat: "Circumvention", IR: { s: "BLOCKED", sp: 0, c: 91, r: 478 }, CN: { s: "WORKING", sp: 4.2, c: 88, r: 645 }, RU: { s: "WORKING", sp: 3.8, c: 84, r: 389 }, VE: { s: "WORKING", sp: 5.1, c: 86, r: 267 }, BY: { s: "WORKING", sp: 4.5, c: 83, r: 312 }, p: { d: 60, c: 68, r: "MEDIUM" } },
-  LANTERN: { name: "Lantern", cat: "Circumvention", IR: { s: "SLOW", sp: 1.5, c: 73, r: 345 }, CN: { s: "WORKING", sp: 3.8, c: 81, r: 512 }, RU: { s: "WORKING", sp: 4.2, c: 79, r: 298 }, VE: { s: "WORKING", sp: 4.8, c: 80, r: 234 }, BY: { s: "WORKING", sp: 4.1, c: 78, r: 267 }, p: { d: 75, c: 61, r: "LOW" } },
-  SIGNAL: { name: "Signal", cat: "Messaging", IR: { s: "WORKING", sp: null, c: 99, r: 1534 }, CN: { s: "BLOCKED", sp: null, c: 97, r: 1123 }, RU: { s: "WORKING", sp: null, c: 98, r: 1298 }, VE: { s: "WORKING", sp: null, c: 99, r: 892 }, BY: { s: "WORKING", sp: null, c: 98, r: 756 }, p: { d: -1, c: 100, r: "NEVER" } }
-};
+import React, { useState, useEffect } from "react";
 
 export function Dashboard() {
   const [country, setCountry] = useState("IR");
-  const tools = Object.values(TOOLS);
+  const [tools, setTools] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real data from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/reports/latest?country=${country}`);
+        const data = await response.json();
+        
+        // If API returns empty, use fallback demo data
+        if (data && data.length > 0) {
+          setTools(data);
+        } else {
+          console.warn("No data from API, using demo data");
+          setTools(getDemoData(country));
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setTools(getDemoData(country));
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [country]);
+
+  // Fallback demo data if API fails
+  const getDemoData = (countryCode) => {
+    const DEMO_TOOLS = {
+      NYM: { name: "NYM VPN", cat: "Mixnet", IR: { s: "WORKING", sp: 6.5, c: 87, r: 234 }, CN: { s: "SLOW", sp: 2.8, c: 71, r: 156 }, RU: { s: "WORKING", sp: 7.2, c: 89, r: 298 }, VE: { s: "WORKING", sp: 5.9, c: 82, r: 167 }, BY: { s: "WORKING", sp: 6.8, c: 85, r: 201 }, p: { d: 180, c: 58, r: "LOW" } },
+      TOR: { name: "Tor Browser", cat: "Anonymity", IR: { s: "WORKING", sp: 3.2, c: 98, r: 1234 }, CN: { s: "BLOCKED", sp: 0, c: 95, r: 892 }, RU: { s: "WORKING", sp: 2.9, c: 96, r: 1045 }, VE: { s: "WORKING", sp: 3.5, c: 97, r: 678 }, BY: { s: "WORKING", sp: 3.1, c: 94, r: 523 }, p: { d: -1, c: 100, r: "NEVER" } },
+      MULLVAD: { name: "Mullvad VPN", cat: "Commercial", IR: { s: "WORKING", sp: 8.5, c: 94, r: 892 }, CN: { s: "BLOCKED", sp: 0, c: 91, r: 567 }, RU: { s: "SLOW", sp: 2.3, c: 85, r: 423 }, VE: { s: "WORKING", sp: 7.8, c: 88, r: 345 }, BY: { s: "WORKING", sp: 8.2, c: 90, r: 456 }, p: { d: 45, c: 82, r: "MEDIUM" } },
+      PROTON: { name: "ProtonVPN", cat: "Commercial", IR: { s: "BLOCKED", sp: 0, c: 94, r: 612 }, CN: { s: "BLOCKED", sp: 0, c: 96, r: 734 }, RU: { s: "SLOW", sp: 1.8, c: 78, r: 389 }, VE: { s: "WORKING", sp: 6.5, c: 85, r: 298 }, BY: { s: "SLOW", sp: 2.4, c: 81, r: 334 }, p: { d: 35, c: 72, r: "MEDIUM" } },
+      EXPRESS: { name: "ExpressVPN", cat: "Commercial", IR: { s: "SLOW", sp: 2.1, c: 76, r: 567 }, CN: { s: "BLOCKED", sp: 0, c: 93, r: 823 }, RU: { s: "SLOW", sp: 1.9, c: 74, r: 445 }, VE: { s: "WORKING", sp: 7.2, c: 82, r: 356 }, BY: { s: "SLOW", sp: 2.3, c: 77, r: 289 }, p: { d: 21, c: 85, r: "HIGH" } },
+      NORD: { name: "NordVPN", cat: "Commercial", IR: { s: "SLOW", sp: 1.5, c: 71, r: 423 }, CN: { s: "BLOCKED", sp: 0, c: 89, r: 678 }, RU: { s: "SLOW", sp: 1.7, c: 73, r: 389 }, VE: { s: "WORKING", sp: 6.8, c: 80, r: 298 }, BY: { s: "SLOW", sp: 2.1, c: 75, r: 267 }, p: { d: 28, c: 78, r: "MEDIUM" } },
+      PSIPHON: { name: "Psiphon", cat: "Circumvention", IR: { s: "BLOCKED", sp: 0, c: 91, r: 478 }, CN: { s: "WORKING", sp: 4.2, c: 88, r: 645 }, RU: { s: "WORKING", sp: 3.8, c: 84, r: 389 }, VE: { s: "WORKING", sp: 5.1, c: 86, r: 267 }, BY: { s: "WORKING", sp: 4.5, c: 83, r: 312 }, p: { d: 60, c: 68, r: "MEDIUM" } },
+      LANTERN: { name: "Lantern", cat: "Circumvention", IR: { s: "SLOW", sp: 1.5, c: 73, r: 345 }, CN: { s: "WORKING", sp: 3.8, c: 81, r: 512 }, RU: { s: "WORKING", sp: 4.2, c: 79, r: 298 }, VE: { s: "WORKING", sp: 4.8, c: 80, r: 234 }, BY: { s: "WORKING", sp: 4.1, c: 78, r: 267 }, p: { d: 75, c: 61, r: "LOW" } },
+      SIGNAL: { name: "Signal", cat: "Messaging", IR: { s: "WORKING", sp: null, c: 99, r: 1534 }, CN: { s: "BLOCKED", sp: null, c: 97, r: 1123 }, RU: { s: "WORKING", sp: null, c: 98, r: 1298 }, VE: { s: "WORKING", sp: null, c: 99, r: 892 }, BY: { s: "WORKING", sp: null, c: 98, r: 756 }, p: { d: -1, c: 100, r: "NEVER" } }
+    };
+    
+    return Object.values(DEMO_TOOLS);
+  };
+
   const countries = [{c:"IR",n:"Iran",f:"🇮🇷"},{c:"CN",n:"China",f:"🇨🇳"},{c:"RU",n:"Russia",f:"🇷🇺"},{c:"VE",n:"Venezuela",f:"🇻🇪"},{c:"BY",n:"Belarus",f:"🇧🇾"}];
   
   const working = tools.filter(t => t[country]?.s === "WORKING");
@@ -72,6 +105,14 @@ export function Dashboard() {
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white p-6 flex items-center justify-center">
+        <div className="text-2xl">Loading threat intelligence...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white p-6">
