@@ -1,4 +1,4 @@
-﻿// src/app/page.tsx
+// src/app/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -43,16 +43,16 @@ export default function Home() {
       {/* Header */}
       <header className="max-w-7xl mx-auto text-center mb-12 p-8 bg-white/5 backdrop-blur-xl rounded-2xl border border-cyan-500/20">
         <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-          🛡️ Global Threat Intelligence
+          ??? Global Threat Intelligence
         </h1>
         <p className="text-gray-400 text-lg">
-          Real-time censorship monitoring • 195 countries • 50 tools tracked
+          Real-time censorship monitoring � 195 countries � 50 tools tracked
         </p>
       </header>
 
       {/* Demo Warning Banner */}
       <div className="max-w-7xl mx-auto mb-8 p-6 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl text-center font-semibold">
-        ⚠️ <strong>PROTOTYPE - DEMO DATA ONLY</strong>
+        ?? <strong>PROTOTYPE - DEMO DATA ONLY</strong>
         <div className="text-sm mt-2 font-normal">
           This dashboard displays randomly generated example data for demonstration purposes.
           <br/>
@@ -125,7 +125,7 @@ export default function Home() {
                       </span>
                     </div>
                     {tool.priority === 1 && (
-                      <span className="text-2xl">⭐</span>
+                      <span className="text-2xl">?</span>
                     )}
                   </div>
 
@@ -135,9 +135,9 @@ export default function Home() {
                     tool.metrics.status === 'slow' ? 'bg-yellow-500/20 text-yellow-400' :
                     'bg-red-500/20 text-red-400'
                   }`}>
-                    {tool.metrics.status === 'working' && '✅ Working'}
-                    {tool.metrics.status === 'slow' && '⚠️ Slow'}
-                    {tool.metrics.status === 'blocked' && '❌ Blocked'}
+                    {tool.metrics.status === 'working' && '? Working'}
+                    {tool.metrics.status === 'slow' && '?? Slow'}
+                    {tool.metrics.status === 'blocked' && '? Blocked'}
                   </div>
 
                   {/* Metrics */}
@@ -160,7 +160,7 @@ export default function Home() {
                   <div className="mb-4 p-3 bg-orange-500/10 rounded-lg">
                     <div className="text-xs text-gray-400 mb-1">Prediction</div>
                     <div className="text-sm text-orange-400">
-                      ⚠️ {tool.metrics.daysUntilBlock} days until blocking
+                      ?? {tool.metrics.daysUntilBlock} days until blocking
                     </div>
                   </div>
 
@@ -179,7 +179,7 @@ export default function Home() {
                           }}
                           className="w-full py-3 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-black font-bold rounded-lg transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
                         >
-                          <span>💰</span>
+                          <span>??</span>
                           Pay with Monero (XMR)
                         </button>
                       )}
@@ -198,13 +198,13 @@ export default function Home() {
           <div className="bg-gradient-to-br from-[#1a1f3a] to-[#0a0e27] p-8 rounded-2xl border-2 border-cyan-400 max-w-md w-full">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-cyan-400">
-                💰 Pay with Monero
+                ?? Pay with Monero
               </h3>
               <button
                 onClick={() => setShowPaymentModal(false)}
                 className="text-gray-400 hover:text-white text-2xl"
               >
-                ×
+                �
               </button>
             </div>
 
@@ -230,11 +230,11 @@ export default function Home() {
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(TOOLS.find(t => t.id === selectedTool)?.moneroAddress || '');
-                  alert('✅ Address copied to clipboard!');
+                  alert('? Address copied to clipboard!');
                 }}
                 className="mt-2 w-full py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg transition-all"
               >
-                📋 Copy Address
+                ?? Copy Address
               </button>
             </div>
 
@@ -254,3 +254,4 @@ export default function Home() {
     </div>
   );
 }
+
