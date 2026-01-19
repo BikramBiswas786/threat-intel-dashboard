@@ -3,6 +3,6 @@
     "builder": "nixpacks"
   },
   "deploy": {
-    "startCommand": "npm start -- -p ${PORT:-3000}"
+    "startCommand": "npm start"
   }
 }
