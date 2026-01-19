@@ -1,0 +1,5 @@
+[33m7763ebf[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Revert "Fix: Replace page.tsx to use API-connected Dashboard component"
+[33m1752a8d[m Fix: Replace page.tsx to use API-connected Dashboard component
+[33mb1c76d2[m Dashboard: Connect to API and fetch real data
+[33m4fa9d8a[m Update dashboard with 50 tools, Monero payments, and world-class UI
+[33mcf4b443[m Add 50 tools and countries data with Monero payment support

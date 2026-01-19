@@ -1,0 +1,5 @@
+[33m6181fc2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m fix: complete tools data with proper typing
+[33m883cb67[m Fix backend entry to server.js
+[33m05feaa6[m Add API endpoint for threat intelligence reports
+[33m93468a4[m Connect 195-country dashboard to real API data
+[33m7763ebf[m Revert "Fix: Replace page.tsx to use API-connected Dashboard component"

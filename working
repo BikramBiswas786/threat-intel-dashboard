@@ -1,0 +1,309 @@
+warning: in the working copy of 'src/app/page.tsx', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/src/app/page.tsx b/src/app/page.tsx[m
+[1mindex d975f80..31f1a2b 100644[m
+[1m--- a/src/app/page.tsx[m
+[1m+++ b/src/app/page.tsx[m
+[36m@@ -1,256 +1,55 @@[m
+[31m-﻿// src/app/page.tsx[m
+[31m-'use client';[m
+[31m-[m
+[31m-import { useState, useEffect } from 'react';[m
+[32m+[m[32m﻿'use client';[m
+[32m+[m[32mimport { useState } from 'react';[m
+ import { TOOLS, COUNTRIES } from '../data/tools';[m
+[31m-[m
+ export default function Home() {[m
+   const [selectedCountry, setSelectedCountry] = useState('IR');[m
+[31m-  const [selectedTool, setSelectedTool] = useState<number | null>(null);[m
+[31m-  const [showPaymentModal, setShowPaymentModal] = useState(false);[m
+[31m-  const [tools, setTools] = useState(TOOLS);[m
+[31m-  const [loading, setLoading] = useState(false);[m
+[31m-[m
+[31m-  // Fetch real API data instead of demo data[m
+[31m-  useEffect(() => {[m
+[31m-    const fetchData = async () => {[m
+[31m-      try {[m
+[31m-        setLoading(true);[m
+[31m-        const response = await fetch(`/api/reports/latest?country=${selectedCountry}`);[m
+[31m-        const data = await response.json();[m
+[31m-        [m
+[31m-        if (data && data.length > 0) {[m
+[31m-          setTools(data);[m
+[31m-        } else {[m
+[31m-          setTools(TOOLS); // Fallback to demo if API fails[m
+[31m-        }[m
+[31m-      } catch (error) {[m
+[31m-        console.error("Error fetching data:", error);[m
+[31m-        setTools(TOOLS); // Fallback to demo if API fails[m
+[31m-      } finally {[m
+[31m-        setLoading(false);[m
+[31m-      }[m
+[31m-    };[m
+[31m-    [m
+[31m-    fetchData();[m
+[31m-  }, [selectedCountry]);[m
+[31m-[m
+[31m-  // Use fetched data[m
+[31m-  const toolsData = tools;[m
+[31m-[m
+   return ([m
+[31m-    <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white p-6">[m
+[31m-      {/* Header */}[m
+[31m-      <header className="max-w-7xl mx-auto text-center mb-12 p-8 bg-white/5 backdrop-blur-xl rounded-2xl border border-cyan-500/20">[m
+[32m+[m[32m    <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white p-8">[m
+[32m+[m[32m      <header className="max-w-7xl mx-auto text-center mb-12">[m
+         <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">[m
+[31m-          🛡️ Global Threat Intelligence[m
+[32m+[m[32m          🛡️ Global Threat Intelligence Dashboard[m
+         </h1>[m
+[31m-        <p className="text-gray-400 text-lg">[m
+[31m-          Real-time censorship monitoring • 195 countries • 50 tools tracked[m
+[31m-        </p>[m
+[32m+[m[32m        <p className="text-gray-400">Real-time censorship monitoring • {TOOLS.length} tools tracked</p>[m
+       </header>[m
+[31m-[m
+[31m-      {/* Demo Warning Banner */}[m
+[31m-      <div className="max-w-7xl mx-auto mb-8 p-6 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl text-center font-semibold">[m
+[31m-        ⚠️ <strong>PROTOTYPE - DEMO DATA ONLY</strong>[m
+[31m-        <div className="text-sm mt-2 font-normal">[m
+[31m-          This dashboard displays randomly generated example data for demonstration purposes.[m
+[31m-          <br/>[m
+[31m-          <strong>NOT suitable for production use by activists.</strong> Real data infrastructure coming soon.[m
+[31m-        </div>[m
+[31m-      </div>[m
+[31m-[m
+[31m-      <div className="max-w-7xl mx-auto">[m
+[31m-        {/* Country Selector */}[m
+[32m+[m[32m      <main className="max-w-7xl mx-auto">[m
+         <div className="mb-8">[m
+[31m-          <h2 className="text-2xl font-bold mb-4 text-cyan-400">Select Country</h2>[m
+[31m-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">[m
+[31m-            {COUNTRIES.map(country => ([m
+[31m-              <button[m
+[31m-                key={country.code}[m
+[31m-                onClick={() => setSelectedCountry(country.code)}[m
+[31m-                className={`p-4 rounded-xl backdrop-blur-xl transition-all duration-300 border-2 ${[m
+[31m-                  selectedCountry === country.code[m
+[31m-                    ? 'bg-cyan-500/30 border-cyan-400 scale-105'[m
+[31m-                    : 'bg-white/5 border-transparent hover:border-cyan-500/50 hover:scale-105'[m
+[31m-                }`}[m
+[31m-              >[m
+[31m-                <div className="text-3xl mb-2">{country.flag}</div>[m
+[31m-                <div className="font-semibold text-sm">{country.name}</div>[m
+[31m-                <div className={`text-xs mt-1 ${[m
+[31m-                  country.priority === 1 ? 'text-red-400' : [m
+[31m-                  country.priority === 2 ? 'text-yellow-400' : [m
+[31m-                  'text-gray-400'[m
+[31m-                }`}>[m
+[31m-                  Freedom: {country.freedom}%[m
+[31m-                </div>[m
+[31m-              </button>[m
+[32m+[m[32m          <label className="block text-cyan-400 font-semibold mb-3">Select Country:</label>[m
+[32m+[m[32m          <select[m[41m [m
+[32m+[m[32m            value={selectedCountry}[m
+[32m+[m[32m            onChange={(e) => setSelectedCountry(e.target.value)}[m
+[32m+[m[32m            className="w-full md:w-64 px-4 py-2 bg-slate-800 border border-cyan-500/30 rounded-lg text-white"[m
+[32m+[m[32m          >[m
+[32m+[m[32m            {COUNTRIES.map(c => ([m
+[32m+[m[32m              <option key={c.code} value={c.code}>[m
+[32m+[m[32m                {c.flag} {c.name} (Freedom: {c.freedom})[m
+[32m+[m[32m              </option>[m
+             ))}[m
+[31m-          </div>[m
+[31m-        </div>[m
+[31m-[m
+[31m-        {/* Tools Grid */}[m
+[31m-        <div className="mb-8">[m
+[31m-          <h2 className="text-2xl font-bold mb-4 text-cyan-400">[m
+[31m-            Tools Status in {COUNTRIES.find(c => c.code === selectedCountry)?.name}[m
+[31m-          </h2>[m
+[31m-          [m
+[31m-          {loading && ([m
+[31m-            <div className="text-center py-12">[m
+[31m-              <div className="inline-block">[m
+[31m-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>[m
+[31m-                <p className="mt-4 text-gray-400">Loading threat intelligence...</p>[m
+[31m-              </div>[m
+[31m-            </div>[m
+[31m-          )}[m
+[31m-          [m
+[31m-          {!loading && ([m
+[31m-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">[m
+[31m-              {toolsData.map(tool => ([m
+[31m-                <div[m
+[31m-                  key={tool.id}[m
+[31m-                  className="p-6 bg-white/5 backdrop-blur-xl rounded-2xl border border-cyan-500/20 hover:border-cyan-400 hover:scale-105 transition-all duration-300 relative overflow-hidden group"[m
+[31m-                >[m
+[31m-                  {/* Gradient hover effect */}[m
+[31m-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>[m
+[31m-                  [m
+[31m-                  {/* Header */}[m
+[31m-                  <div className="flex justify-between items-start mb-4">[m
+[31m-                    <div>[m
+[31m-                      <h3 className="text-xl font-bold text-cyan-400 mb-1">[m
+[31m-                        {tool.name}[m
+[31m-                      </h3>[m
+[31m-                      <span className="text-xs px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full">[m
+[31m-                        {tool.category}[m
+[31m-                      </span>[m
+[31m-                    </div>[m
+[31m-                    {tool.priority === 1 && ([m
+[31m-                      <span className="text-2xl">⭐</span>[m
+[31m-                    )}[m
+[31m-                  </div>[m
+[31m-[m
+[31m-   warning: in the working copy of 'src/app/page.tsx', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/src/app/page.tsx b/src/app/page.tsx[m
+[1mindex d975f80..31f1a2b 100644[m
+[1m--- a/src/app/page.tsx[m
+[1m+++ b/src/app/page.tsx[m
+[36m@@ -1,256 +1,55 @@[m
+[31m-﻿// src/app/page.tsx[m
+[31m-'use client';[m
+[31m-[m
+[31m-import { useState, useEffect } from 'react';[m
+[32m+[m[32m﻿'use client';[m
+[32m+[m[32mimport { useState } from 'react';[m
+ import { TOOLS, COUNTRIES } from '../data/tools';[m
+[31m-[m
+ export default function Home() {[m
+   const [selectedCountry, setSelectedCountry] = useState('IR');[m
+[31m-  const [selectedTool, setSelectedTool] = useState<number | null>(null);[m
+[31m-  const [showPaymentModal, setShowPaymentModal] = useState(false);[m
+[31m-  const [tools, setTools] = useState(TOOLS);[m
+[31m-  const [loading, setLoading] = useState(false);[m
+[31m-[m
+[31m-  // Fetch real API data instead of demo data[m
+[31m-  useEffect(() => {[m
+[31m-    const fetchData = async () => {[m
+[31m-      try {[m
+[31m-        setLoading(true);[m
+[31m-        const response = await fetch(`/api/reports/latest?country=${selectedCountry}`);[m
+[31m-        const data = await response.json();[m
+[31m-        [m
+[31m-        if (data && data.length > 0) {[m
+[31m-          setTools(data);[m
+[31m-        } else {[m
+[31m-          setTools(TOOLS); // Fallback to demo if API fails[m
+[31m-        }[m
+[31m-      } catch (error) {[m
+[31m-        console.error("Error fetching data:", error);[m
+[31m-        setTools(TOOLS); // Fallback to demo if API fails[m
+[31m-      } finally {[m
+[31m-        setLoading(false);[m
+[31m-      }[m
+[31m-    };[m
+[31m-    [m
+[31m-    fetchData();[m
+[31m-  }, [selectedCountry]);[m
+[31m-[m
+[31m-  // Use fetched data[m
+[31m-  const toolsData = tools;[m
+[31m-[m
+   return ([m
+[31m-    <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white p-6">[m
+[31m-      {/* Header */}[m
+[31m-      <header className="max-w-7xl mx-auto text-center mb-12 p-8 bg-white/5 backdrop-blur-xl rounded-2xl border border-cyan-500/20">[m
+[32m+[m[32m    <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white p-8">[m
+[32m+[m[32m      <header className="max-w-7xl mx-auto text-center mb-12">[m
+         <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">[m
+[31m-          🛡️ Global Threat Intelligence[m
+[32m+[m[32m          🛡️ Global Threat Intelligence Dashboard[m
+         </h1>[m
+[31m-        <p className="text-gray-400 text-lg">[m
+[31m-          Real-time censorship monitoring • 195 countries • 50 tools tracked[m
+[31m-        </p>[m
+[32m+[m[32m        <p className="text-gray-400">Real-time censorship monitoring • {TOOLS.length} tools tracked</p>[m
+       </header>[m
+[31m-[m
+[31m-      {/* Demo Warning Banner */}[m
+[31m-      <div className="max-w-7xl mx-auto mb-8 p-6 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl text-center font-semibold">[m
+[31m-        ⚠️ <strong>PROTOTYPE - DEMO DATA ONLY</strong>[m
+[31m-        <div className="text-sm mt-2 font-normal">[m
+[31m-          This dashboard displays randomly generated example data for demonstration purposes.[m
+[31m-          <br/>[m
+[31m-          <strong>NOT suitable for production use by activists.</strong> Real data infrastructure coming soon.[m
+[31m-        </div>[m
+[31m-      </div>[m
+[31m-[m
+[31m-      <div className="max-w-7xl mx-auto">[m
+[31m-        {/* Country Selector */}[m
+[32m+[m[32m      <main className="max-w-7xl mx-auto">[m
+         <div className="mb-8">[m
+[31m-          <h2 className="text-2xl font-bold mb-4 text-cyan-400">Select Country</h2>[m
+[31m-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">[m
+[31m-            {COUNTRIES.map(country => ([m
+[31m-              <button[m
+[31m-                key={country.code}[m
+[31m-                onClick={() => setSelectedCountry(country.code)}[m
+[31m-                className={`p-4 rounded-xl backdrop-blur-xl transition-all duration-300 border-2 ${[m
+[31m-                  selectedCountry === country.code[m
+[31m-                    ? 'bg-cyan-500/30 border-cyan-400 scale-105'[m
+[31m-                    : 'bg-white/5 border-transparent hover:border-cyan-500/50 hover:scale-105'[m
+[31m-                }`}[m
+[31m-              >[m
+[31m-                <div className="text-3xl mb-2">{country.flag}</div>[m
+[31m-                <div className="font-semibold text-sm">{country.name}</div>[m
+[31m-                <div className={`text-xs mt-1 ${[m
+[31m-                  country.priority === 1 ? 'text-red-400' : [m
+[31m-                  country.priority === 2 ? 'text-yellow-400' : [m
+[31m-                  'text-gray-400'[m
+[31m-                }`}>[m
+[31m-                  Freedom: {country.freedom}%[m
+[31m-                </div>[m
+[31m-              </button>[m
+[32m+[m[32m          <label className="block text-cyan-400 font-semibold mb-3">Select Country:</label>[m
+[32m+[m[32m          <select[m[41m [m
+[32m+[m[32m            value={selectedCountry}[m
+[32m+[m[32m            onChange={(e) => setSelectedCountry(e.target.value)}[m
+[32m+[m[32m            className="w-full md:w-64 px-4 py-2 bg-slate-800 border border-cyan-500/30 rounded-lg text-white"[m
+[32m+[m[32m          >[m
+[32m+[m[32m            {COUNTRIES.map(c => ([m
+[32m+[m[32m              <option key={c.code} value={c.code}>[m
+[32m+[m[32m                {c.flag} {c.name} (Freedom: {c.freedom})[m
+[32m+[m[32m              </option>[m
+             ))}[m
+[31m-          </div>[m
+[31m-        </div>[m
+[31m-[m
+[31m-        {/* Tools Grid */}[m
+[31m-        <div className="mb-8">[m
+[31m-          <h2 className="text-2xl font-bold mb-4 text-cyan-400">[m
+[31m-            Tools Status in {COUNTRIES.find(c => c.code === selectedCountry)?.name}[m
+[31m-          </h2>[m
+[31m-          [m
+[31m-          {loading && ([m
+[31m-            <div className="text-center py-12">[m
+[31m-              <div className="inline-block">[m
+[31m-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>[m
+[31m-                <p className="mt-4 text-gray-400">Loading threat intelligence...</p>[m
+[31m-              </div>[m
+[31m-            </div>[m
+[31m-          )}[m
+[31m-          [m
+[31m-          {!loading && ([m
+[31m-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">[m
+[31m-              {toolsData.map(tool => ([m
+[31m-                <div[m
+[31m-                  key={tool.id}[m
+[31m-                  className="p-6 bg-white/5 backdrop-blur-xl rounded-2xl border border-cyan-500/20 hover:border-cyan-400 hover:scale-105 transition-all duration-300 relative overflow-hidden group"[m
+[31m-                >[m
+[31m-                  {/* Gradient hover effect */}[m
+[31m-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>[m
+[31m-                  [m
+[31m-                  {/* Header */}[m
+[31m-                  <div className="flex justify-between items-start mb-4">[m
+[31m-                    <div>[m
+[31m-                      <h3 className="text-xl font-bold text-cyan-400 mb-1">[m
+[31m-                        {tool.name}[m
+[31m-                      </h3>[m
+[31m-                      <span className="text-xs px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full">[m
+[31m-                        {tool.category}[m
+[31m-                      </span>[m
+[31m-                    </div>[m
+[31m-                    {tool.priority === 1 && ([m
+[31m-                      <span className="text-2xl">⭐</span>[m
+[31m-                    )}[m
+[31m-                  </div>[m
+[31m-[m
+[31m-   

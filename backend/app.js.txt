@@ -1,0 +1,100 @@
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Actor results ingestion endpoint
+app.post('/api/ingest/actor-results', (req, res) => {
+  try {
+    const { actor, timestamp, version, results, summary } = req.body;
+    
+    if (!actor || !results) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Missing required fields: actor, results'
+      });
+    }
+
+    console.log(`✅ Received from ${actor}: ${summary?.totalRecords || results.length} records`);
+
+    // TODO: Store in database here
+    // await db.query('INSERT INTO actor_results ...')
+
+    res.json({
+      status: 'success',
+      message: `Ingested ${summary?.totalRecords || results.length} records from ${actor}`,
+      actor,
+      timestamp,
+      recordsStored: summary?.totalRecords || results.length
+    });
+  } catch (error) {
+    console.error('❌ Ingest error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
+  }
+});
+
+// Get ingest status
+app.get('/api/ingest/status', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'Ingest endpoint operational',
+    expectedActors: 9,
+    endpoints: {
+      ingest: '/api/ingest/actor-results (POST)',
+      health: '/health (GET)',
+      status: '/api/ingest/status (GET)'
+    }
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    status: 'error',
+    code: 404,
+    message: 'Endpoint not found',
+    availableEndpoints: [
+      'GET /health',
+      'GET /api/ingest/status',
+      'POST /api/ingest/actor-results'
+    ]
+  });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('❌ Server error:', err);
+  res.status(500).json({
+    status: 'error',
+    message: err.message || 'Internal server error'
+  });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Backend running on port ${PORT}`);
+  console.log(`📊 API: http://localhost:${PORT}/api`);
+  console.log(`✅ Health: http://localhost:${PORT}/health`);
+  console.log(`📍 Status: http://localhost:${PORT}/api/ingest/status`);
+});
+
+module.exports = app;
