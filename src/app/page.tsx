@@ -44,8 +44,7 @@ export default function DashboardPage() {
       try {
         setLoading(true);
         const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
-        const response = await fetch(`${apiUrl}/api/threats`, {
-          method: 'GET',
+     const response = await fetch(`${apiUrl}/api/threats?country=ALL`, {          method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
 
