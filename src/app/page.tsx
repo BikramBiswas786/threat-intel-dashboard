@@ -44,7 +44,7 @@ export default function DashboardPage() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const apiUrl = 'https://threat-dashboard-backend.vercel.app'-backend.vercel.app || 'http://localhost:3001';
+            const apiUrl = 'https://threat-dashboard-backend.vercel.app' || 'http://localhost:3001';
      const response = await fetch(`${apiUrl}/api/threats?country=ALL`, {          method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
