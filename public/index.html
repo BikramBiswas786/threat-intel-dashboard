@@ -1,235 +1,319 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Censorship Threat Dashboard</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-        }
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-        .content {
-            padding: 40px;
-        }
-        .controls {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .country-select {
-            padding: 12px 16px;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            font-size: 1em;
-            cursor: pointer;
-            min-width: 200px;
-            transition: all 0.3s ease;
-        }
-        .country-select:hover { border-color: #764ba2; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); }
-        .load-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        .load-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); }
-        .load-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        .stat-card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }
-        .stat-card h3 {
-            color: #667eea;
-            font-size: 0.9em;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .stat-card .value {
-            font-size: 2em;
-            font-weight: 700;
-            color: #333;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th {
-            background: #f8f9fa;
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-            color: #333;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        tr:hover { background: #f8f9fa; }
-        .loading, .error {
-            text-align: center;
-            padding: 40px;
-            font-size: 1.1em;
-        }
-        .loading { color: #667eea; }
-        .error { color: #e74c3c; }
-        .empty { text-align: center; padding: 40px; color: #999; }
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: 600;
-        }
-        .status-working { background: #d4edda; color: #155724; }
-        .status-slow { background: #fff3cd; color: #856404; }
-        .status-blocked { background: #f8d7da; color: #721c24; }
-        .footer {
-            background: #f8f9fa;
-            padding: 20px;
-            text-align: center;
-            color: #999;
-            border-top: 1px solid #e0e0e0;
-            font-size: 0.9em;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌐 Internet Censorship Check - See if VPNs & Tools Work in Your Country</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+min-height: 100vh;
+padding: 20px;
+color: #333;
+}
+.container {
+max-width: 1400px;
+margin: 0 auto;
+background: #f0f2f5;
+border-radius: 16px;
+box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+overflow: hidden;
+}
+.header {
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+color: white;
+padding: 40px 30px;
+text-align: center;
+}
+.header h1 {
+font-size: 2.2em;
+margin-bottom: 10px;
+font-weight: 700;
+}
+.header p {
+font-size: 1.15em;
+opacity: 0.95;
+}
+.hero-notice {
+background: #ff6b6b;
+color: white;
+padding: 15px 30px;
+text-align: center;
+font-weight: 600;
+font-size: 1.1em;
+}
+.content {
+padding: 40px 30px;
+}
+.controls {
+background: #f8f9fa;
+padding: 25px;
+border-radius: 12px;
+margin-bottom: 30px;
+border: 2px solid #e9ecef;
+}
+.control-row {
+display: flex;
+gap: 15px;
+flex-wrap: wrap;
+align-items: center;
+margin-bottom: 15px;
+}
+.control-row:last-child { margin-bottom: 0; }
+.control-group {
+flex: 1;
+min-width: 200px;
+}
+.control-group label {
+display: block;
+font-weight: 600;
+color: #495057;
+margin-bottom: 8px;
+font-size: 0.9em;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+.country-select, .tool-select {
+width: 100%;
+padding: 12px 16px;
+border: 2px solid #667eea;
+border-radius: 8px;
+font-size: 1em;
+cursor: pointer;
+background: background: #ffffff#f0f2f5;;
+transition: all 0.3s ease;
+}
+.country-select:hover, .tool-select:hover {
+border-color: #764ba2;
+box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+.load-btn {
+padding: 14px 35px;
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+color: white;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+font-size: 1.05em;
+font-weight: 700;
+transition: all 0.3s ease;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+.load-btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+}
+.load-btn:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+transform: none;
+}
+.stats {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+gap: 20px;
+margin-bottom: 30px;
+}
+.stat-card {
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+color: white;
+padding: 25px;
+border-radius: 12px;
+box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+text-align: center;
+transition: transform 0.3s ease;
+}
+.stat-card:hover { transform: translateY(-5px); }
+.stat-card h3 {
+font-size: 0.85em;
+opacity: 0.9;
+margin-bottom: 10px;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+.stat-card .value {
+font-size: 2.5em;
+font-weight: 700;
+}
+table {
+width: 100%;
+border-collapse: collapse;
+margin-top: 20px;
+background: background: #ffffff#f0f2f5;;
+border-radius: 8px;
+overflow: hidden;
+box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+th {
+background: #667eea;
+color: white;
+padding: 18px 15px;
+text-align: left;
+font-weight: 600;
+font-size: 0.95em;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+td {
+padding: 15px;
+border-bottom: 1px solid #e9ecef;
+font-size: 0.95em;
+}
+tr:hover { background: #f8f9fa; }
+tr:last-child td { border-bottom: none; }
+.status-badge {
+display: inline-block;
+padding: 6px 14px;
+border-radius: 20px;
+font-size: 0.85em;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+.status-working { background: #d4edda; color: #155724; }
+.status-blocked { background: #f8d7da; color: #721c24; }
+.status-anomaly { background: #fff3cd; color: #856404; }
+.loading, .error, .empty {
+text-align: center;
+padding: 60px 20px;
+font-size: 1.2em;
+}
+.loading { color: #667eea; }
+.error { color: #e74c3c; font-weight: 600; }
+.empty { color: #6c757d; }
+.footer {
+background: #2c3e50;
+color: white;
+padding: 30px;
+text-align: center;
+}
+.footer a {
+color: #667eea;
+text-decoration: none;
+font-weight: 600;
+}
+.footer a:hover { text-decoration: underline; }
+@media (max-width: 768px) {
+.header h1 { font-size: 1.6em; }
+.control-row { flex-direction: column; }
+.control-group { width: 100%; }
+.stats { grid-template-columns: 1fr; }
+table { font-size: 0.85em; }
+th, td { padding: 12px 8px; }
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🌍 Global Censorship Threat Dashboard</h1>
-            <p>Real-time internet censorship & threat intelligence data from around the world</p>
-        </div>
-        <div class="content">
-            <div class="controls">
-                <select id="countrySelect" class="country-select">
-                    <option value="ALL">🌐 All Countries</option>
-                    <option value="IR">🇮🇷 Iran</option>
-                    <option value="CN">🇨🇳 China</option>
-                    <option value="RU">🇷🇺 Russia</option>
-                    <option value="KP">🇰🇵 North Korea</option>
-                    <option value="SY">🇸🇾 Syria</option>
-                    <option value="CU">🇨🇺 Cuba</option>
-                    <option value="VN">🇻🇳 Vietnam</option>
-                    <option value="TH">🇹🇭 Thailand</option>
-                    <option value="EG">🇪🇬 Egypt</option>
-                </select>
-                <button class="load-btn" onclick="loadData()">📊 Load Data</button>
-            </div>
-            <div id="stats" class="stats"></div>
-            <div id="tableContainer"></div>
-        </div>
-        <div class="footer">
-            <p>Data sourced from OONI Explorer & M-Lab • Updates every 6 hours • API: <strong>/api/threats?country=COUNTRY_CODE</strong></p>
-        </div>
-    </div>
-
-    <script>
-        const API_BASE = 'https://threat-dashboard-backend.vercel.app';
-        
-        async function loadData() {
-            const country = document.getElementById('countrySelect').value;
-            const tableContainer = document.getElementById('tableContainer');
-            const statsContainer = document.getElementById('stats');
-            
-            tableContainer.innerHTML = '<div class="loading">⏳ Loading data...</div>';
-            statsContainer.innerHTML = '';
-            
-            try {
-                const response = await fetch(`${API_BASE}/api/threats?country=${country}`);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                const data = await response.json();
-                
-                // Display stats
-                statsContainer.innerHTML = `
-                    <div class="stat-card">
-                        <h3>Country</h3>
-                        <div class="value">${data.country}</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Tools Tracked</h3>
-                        <div class="value">${data.count}</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Last Updated</h3>
-                        <div class="value" style="font-size: 0.9em;">${new Date(data.generated_at).toLocaleString()}</div>
-                    </div>
-                `;
-                
-                if (!data.threats || data.threats.length === 0) {
-                    tableContainer.innerHTML = '<div class="empty">No threat data available for this country yet.</div>';
-                    return;
-                }
-                
-                // Display table
-                let html = '<table><thead><tr><th>🔧 Tool</th><th>📊 Reports</th><th>⚡ Speed (Mbps)</th><th>✅ Effectiveness</th></tr></thead><tbody>';
-                
-                data.threats.forEach(threat => {
-                    html += `
-                        <tr>
-                            <td><strong>${threat.tool}</strong></td>
-                            <td>${threat.reports}</td>
-                            <td>${threat.speed || 'N/A'}</td>
-                            <td>${threat.effectiveness ? threat.effectiveness + '%' : 'N/A'}</td>
-                        </tr>
-                    `;
-                });
-                
-                html += '</tbody></table>';
-                tableContainer.innerHTML = html;
-            } catch (error) {
-                tableContainer.innerHTML = `<div class="error">❌ Error loading data: ${error.message}</div>`;
-                console.error('Error:', error);
-            }
-        }
-        
-        // Load default data on page load
-        window.addEventListener('load', loadData);
-    </script>
+<div class="container">
+<div class="header">
+<h1>🌐 Check Internet Censorship in Your Country</h1>
+<p>See which VPNs, proxies, and circumvention tools work or are blocked in your region</p>
+</div>
+<div class="hero-notice">
+🔴 LIVE DATA: Real censorship measurements from OONI Explorer & M-Lab Network
+</div>
+<div class="content">
+<div class="controls">
+<div class="control-row">
+<div class="control-group">
+<label for="countrySelect">🌍 Select Your Country</label>
+<select id="countrySelect" class="country-select">
+<option value="ALL">🌐 All Countries (Global Overview)</option>
+<option value="IR">🇮🇷 Iran</option>
+<option value="CN">🇨🇳 China</option>
+<option value="RU">🇷🇺 Russia</option>
+<option value="KP">🇰🇵 North Korea</option>
+<option value="SY">🇸🇾 Syria</option>
+<option value="CU">🇨🇺 Cuba</option>
+<option value="VN">🇻🇳 Vietnam</option>
+<option value="TH">🇹🇭 Thailand</option>
+<option value="TR">🇹🇷 Turkey</option>
+<option value="EG">🇪🇬 Egypt</option>
+<option value="IN">🇮🇳 India</option>
+<option value="PK">🇵🇰 Pakistan</option>
+<option value="SA">🇸🇦 Saudi Arabia</option>
+<option value="AE">🇦🇪 UAE</option>
+</select>
+</div>
+<div class="control-group">
+<label for="toolSelect">🛡️ Filter by Tool/Service</label>
+<select id="toolSelect" class="tool-select">
+<option value="all">All Tools & Services</option>
+<option value="vpn">VPNs (Psiphon, OpenVPN, etc.)</option>
+<option value="proxy">Proxies & Tunnels (Tor, Shadowsocks)</option>
+<option value="messaging">Messaging (WhatsApp, Telegram, Signal)</option>
+<option value="website">Website Blocking Tests</option>
+</select>
+</div>
+</div>
+<div class="control-row">
+<button class="load-btn" onclick="loadData()">🔍 CHECK CENSORSHIP STATUS</button>
+</div>
+</div>
+<div id="stats" class="stats"></div>
+<div id="tableContainer"></div>
+</div>
+<div class="footer">
+<p><strong>Data Source:</strong> OONI Explorer (Open Observatory of Network Interference) & M-Lab Network</p>
+<p style="margin-top: 10px;">API: <a href="https://threat-dashboard-backend.vercel.app/api/threats?country=ALL" target="_blank">/api/threats?country=CODE</a></p>
+<p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">This tool helps citizens worldwide understand internet censorship in their countries</p>
+</div>
+</div>
+<script>
+const API_BASE = 'https://threat-dashboard-backend.vercel.app';
+async function loadData() {
+const country = document.getElementById('countrySelect').value;
+const tool = document.getElementById('toolSelect').value;
+const tableContainer = document.getElementById('tableContainer');
+const statsContainer = document.getElementById('stats');
+tableContainer.innerHTML = '<div class="loading">⏳ Loading censorship data...</div>';
+statsContainer.innerHTML = '';
+try {
+const response = await fetch(`${API_BASE}/api/threats?country=${country}`);
+if (!response.ok) throw new Error(`HTTP ${response.status}`);
+const data = await response.json();
+statsContainer.innerHTML = `
+<div class="stat-card">
+<h3>Selected Country</h3>
+<div class="value">${data.country || 'N/A'}</div>
+</div>
+<div class="stat-card">
+<h3>Tools Monitored</h3>
+<div class="value">${data.count || 0}</div>
+</div>
+<div class="stat-card">
+<h3>Last Check</h3>
+<div class="value" style="font-size: 1.2em;">${data.generated_at ? new Date(data.generated_at).toLocaleDateString() : 'N/A'}</div>
+</div>
+`;
+if (!data.threats || data.threats.length === 0) {
+tableContainer.innerHTML = '<div class="empty">⚠️ No censorship data available yet for this country. Data is being collected.</div>';
+return;
+}
+let html = '<table><thead><tr><th>🛡️ Tool/Service</th><th>📊 Test Reports</th><th>⚡ Avg Speed (Mbps)</th><th>✅ Success Rate</th></tr></thead><tbody>';
+data.threats.forEach(threat => {
+const status = threat.effectiveness >= 70 ? 'working' : threat.effectiveness >= 40 ? 'anomaly' : 'blocked';
+const statusLabel = threat.effectiveness >= 70 ? '✅ WORKING' : threat.effectiveness >= 40 ? '⚠️ UNSTABLE' : '🔴 BLOCKED';
+html += `
+<tr>
+<td><strong>${threat.tool || 'Unknown'}</strong></td>
+<td>${threat.reports || 0}</td>
+<td>${threat.speed || 'N/A'}</td>
+<td><span class="status-badge status-${status}">${statusLabel} ${threat.effectiveness}%</span></td>
+</tr>
+`;
+});
+html += '</tbody></table>';
+tableContainer.innerHTML = html;
+} catch (error) {
+tableContainer.innerHTML = `<div class="error">❌ Error: ${error.message}. Backend may be updating.</div>`;
+console.error('Error:', error);
+}
+}
+window.addEventListener('load', loadData);
+</script>
 </body>
 </html>
