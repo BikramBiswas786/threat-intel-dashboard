@@ -64,7 +64,7 @@ export default function DashboardPage() {
             {threats && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-6 rounded-xl shadow-lg">
+                  <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-6 rounded-xl shadow-lg"> 
                     <p className="text-sm font-bold uppercase opacity-90 mb-2">Country</p>
                     <p className="text-3xl font-bold">{threats.country}</p>
                   </div>
