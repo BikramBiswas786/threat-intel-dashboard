@@ -13,8 +13,7 @@ WORKDIR /app
 COPY backend/package*.json ./
 
 # Install dependencies and rebuild native modules
-RUN npm install --production && npm rebuild sqlite3
-
+RUN npm install --production && rm -rf node_modules/sqlite3/build && npm rebuild sqlite3
 # Copy backend source code
 COPY backend/ ./
 
