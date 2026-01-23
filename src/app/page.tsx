@@ -1,12 +1,29 @@
 ﻿'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TOOLS, COUNTRIES } from '../data/tools';
 export default function Home() {
   const [selectedCountry, setSelectedCountry] = useState('IR');
   const [selectedTool, setSelectedTool] = useState<number | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  // Use local TOOLS data - no API calls
-  const toolsData = TOOLS;
+  const [toolsData, setToolsData] = useState([]);
+
+  useEffect(() => {
+    const fetchThreats = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+        const response = await fetch(`${baseUrl}/api/threats`);
+        if (response.ok) {
+          const data = await response.json();
+          setToolsData(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch threats:', error);
+        setToolsData(TOOLS); // Fallback to local data
+      }
+    };
+    fetchThreats();
+  }, []);
+  
   const currentCountry = COUNTRIES.find(c => c.code === selectedCountry);
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#1a1f3a] to-[#0a0e27] text-white p-6">
