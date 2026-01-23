@@ -5,7 +5,7 @@ export default function Home() {
   const [selectedCountry, setSelectedCountry] = useState('IR');
   const [selectedTool, setSelectedTool] = useState<number | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [toolsData, setToolsData] = useState([]);
+  const [toolsData, setToolsData] = useStat<typeof TOOLS>([]);
 
   useEffect(() => {
     const fetchThreats = async () => {
