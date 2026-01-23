@@ -1,15 +1,27 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 
-interface OONIData {
+interface ThreatData {
+  input: string | null;
+  source: string;
+  anomaly: boolean;
   country: string;
-  count: number;
-  threats: Array<{tool: string; reports: number; speed: string; effectiveness: number}>;
-  generated_at: string;
+  failure: boolean;
+  probeAsn: string;
+  testName: string;
+  confirmed: boolean;
+  timestamp: string;
+  probeCountryCode: string;
+  measurementStartTime: string;
+}
+
+interface BackendResponse {
+  data: ThreatData[];
 }
 
 export default function DashboardPage() {
-  const [threats, setThreats] = useState<OONIData | null>(null);
+  const [threats, setThreats] = useState<ThreatData[]>([]);
   const [loading, setLoading] = useState(true);
   const [country, setCountry] = useState('ALL');
 
@@ -17,8 +29,11 @@ export default function DashboardPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`https://threat-dashboard-backend.vercel.app/api/threats?country=${country}`, {mode: 'cors'});
-        if (res.ok) setThreats(await res.json());
+        const res = await fetch(`https://threat-dashboard-backend.vercel.app/api/threats?country=${country}`, { mode: 'cors' });
+        if (res.ok) {
+          const response: BackendResponse = await res.json();
+          setThreats(response.data || []);
+        }
       } catch (e) {
         console.error(e);
       }
@@ -35,14 +50,14 @@ export default function DashboardPage() {
             <h1 className="text-4xl font-bold mb-2">🌐 Internet Censorship Check</h1>
             <p className="text-xl opacity-90">Check if VPNs, websites, and messaging apps work in your country</p>
           </div>
-          <div className="bg-red-500 text-white p-4 text-center font-bold text-lg">🔴 LIVE DATA: Real-time censorship monitoring from OONI Explorer & M-Lab Network</div>
+          <div className="bg-red-500 text-white p-4 text-center font-bold text-lg">🔴 LIVE DATA: Real-time censorship monitoring from OONI Explorer</div>
           
           <div className="p-8">
             <div className="bg-gray-100 p-6 rounded-xl mb-8 border-2 border-gray-200">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                   <label className="block text-gray-700 font-bold text-sm mb-3 uppercase tracking-wide">🌍 Select Your Country</label>
-                  <select value={country} onChange={e => setCountry(e.target.value)} className="w-full px-4 py-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:border-purple-600 text-gray-800 font-semibold">
+                  <select value={country} onChange={(e) => setCountry(e.target.value)} className="w-full px-4 py-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:border-purple-600 text-gray-800 font-semibold">
                     <option value="ALL">🌐 All Countries</option>
                     <option value="IR">🇮🇷 Iran</option>
                     <option value="CN">🇨🇳 China</option>
@@ -56,49 +71,38 @@ export default function DashboardPage() {
                   </select>
                 </div>
                 <div className="text-gray-700 font-semibold">
-                  {loading ? '⏳ Loading...' : `✅ Last updated: ${threats ? new Date(threats.generated_at).toLocaleDateString() : 'N/A'}`}
+                  {loading ? '⏳ Loading...' : `✅ Data loaded: ${threats.length} tests found`}
                 </div>
               </div>
             </div>
 
-            {threats && (
+            {threats.length > 0 && (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-6 rounded-xl shadow-lg"> 
-                    <p className="text-sm font-bold uppercase opacity-90 mb-2">Country</p>
-                    <p className="text-3xl font-bold">{threats.country}</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-purple-600 to-purple-700 text-white p-6 rounded-xl shadow-lg">
-                    <p className="text-sm font-bold uppercase opacity-90 mb-2">Tools Tracked</p>
-                    <p className="text-3xl font-bold">{threats.count}</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 text-white p-6 rounded-xl shadow-lg">
-                    <p className="text-sm font-bold uppercase opacity-90 mb-2">Last Check</p>
-                    <p className="text-2xl font-bold">{new Date(threats.generated_at).toLocaleDateString()}</p>
-                  </div>
+                <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 text-white p-6 rounded-xl shadow-lg">
+                  <p className="text-sm font-bold uppercase opacity-90 mb-2">Last Check</p>
+                  <p className="text-2xl font-bold">{new Date(threats[0].timestamp).toLocaleString()}</p>
                 </div>
 
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
                       <tr className="bg-blue-600 text-white">
-                        <th className="px-6 py-4 text-left font-bold text-sm uppercase">🛡️ Tool/Service</th>
+                        <th className="px-6 py-4 text-left font-bold text-sm uppercase">🛡 Tool/Service</th>
                         <th className="px-6 py-4 text-left font-bold text-sm uppercase">📊 Tests</th>
-                        <th className="px-6 py-4 text-left font-bold text-sm uppercase">⚡ Speed</th>
+                        <th className="px-6 py-4 text-left font-bold text-sm uppercase">🚀 Speed</th>
                         <th className="px-6 py-4 text-left font-bold text-sm uppercase">📈 Success Rate</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {threats.threats.map((threat, idx) => {
-                        const eff = threat.effectiveness || 0;
-                        const statusColor = eff >= 70 ? 'bg-green-100 text-green-800' : eff >= 40 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800';
-                        const statusLabel = eff >= 70 ? '✅ WORKING' : eff >= 40 ? '⚠️ UNSTABLE' : '🔴 BLOCKED';
+                      {threats.slice(0, 50).map((threat, idx) => {
+                        const statusColor = threat.anomaly ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
+                        const statusLabel = threat.anomaly ? '🔴 BLOCKED' : '✅ WORKING';
                         return (
                           <tr key={idx} className="border-b border-gray-200 hover:bg-gray-50">
-                            <td className="px-6 py-4 font-bold text-gray-800">{threat.tool}</td>
-                            <td className="px-6 py-4 text-gray-700">{threat.reports}</td>
-                            <td className="px-6 py-4 text-gray-700">{threat.speed || 'N/A'}</td>
-                            <td className="px-6 py-4"><span className={`px-3 py-1 rounded-full font-bold text-sm ${statusColor}`}>{statusLabel} {eff}%</span></td>
+                            <td className="px-6 py-4 font-bold text-gray-800">{threat.testName}</td>
+                            <td className="px-6 py-4 text-gray-700">{threat.source}</td>
+                            <td className="px-6 py-4 text-gray-700">{threat.country}</td>
+                            <td className="px-6 py-4"><span className={`px-3 py-1 rounded-full font-bold text-sm ${statusColor}`}>{statusLabel}</span></td>
                           </tr>
                         );
                       })}
@@ -107,12 +111,12 @@ export default function DashboardPage() {
                 </div>
               </>
             )}
-            {!loading && !threats && <div className="text-center py-12 text-gray-600 font-semibold text-lg">⚠️ No data available. Try another country.</div>}
-          </div>
 
-          <div className="bg-gray-800 text-white p-6 text-center text-sm">
-            <p><strong>Data:</strong> OONI Explorer & M-Lab • <strong>API:</strong> <a href="https://threat-dashboard-backend.vercel.app/api/threats?country=ALL" className="text-blue-400 hover:underline">/api/threats?country=CODE</a></p>
-            <p className="mt-2 opacity-75">Help citizens check internet censorship worldwide</p>
+            {!loading && threats.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-gray-600 text-lg">No data available for the selected country.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
