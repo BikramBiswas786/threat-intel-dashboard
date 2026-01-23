@@ -26,8 +26,8 @@ export default function DashboardPage() {
 
         if (response.ok) {
           const data = await response.json();
-setThreats(data);          setError(null);
-        } else {
+setThreats(data.data || []);
+          setError(null);        } else {
           setError('Failed to fetch threats');
         }
       } catch (err) {
