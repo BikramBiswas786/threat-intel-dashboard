@@ -30,7 +30,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-600 p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8 text-center">
             <h1 className="text-4xl font-bold mb-2">🌐 Internet Censorship Check</h1>
             <p className="text-xl opacity-90">Check if VPNs, websites, and messaging apps work in your country</p>
