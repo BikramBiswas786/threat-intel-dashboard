@@ -22,11 +22,11 @@ export default function DashboardPage() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/threats?country=ALL', {
+        const response = await fetch('https://threat-dashboard-backend.vercel.app/api/threats?country=ALL', { mode: 'cors' });
 
         if (response.ok) {
           const data = await response.json();
-          setThreats(data);
+          setThreats(da);
           setError(null);
         } else {
           setError('Failed to fetch threats');
