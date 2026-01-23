@@ -1,4 +1,5 @@
-﻿'use client';
+46
+  'use client';
 
 import { useState, useEffect } from 'react';
 
@@ -43,7 +44,7 @@ export default function DashboardPage() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+        const apiUrl = https://threat-dashboard-backend.vercel.app || 'http://localhost:3001';
      const response = await fetch(`${apiUrl}/api/threats?country=ALL`, {          method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
