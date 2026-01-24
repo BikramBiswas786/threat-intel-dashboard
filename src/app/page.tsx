@@ -335,7 +335,6 @@ export default function DashboardPage() {
             <p className="text-sm text-yellow-800">⚠️ Showing first 500 of {filteredThreats.length} results</p>
           </div>
         )}
-      </div>
-    </div>
+          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">    </div>
   );
 }
