@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import VPNCensorshipIntelligence from '@/components/VPNCensorshipIntelligence';
 
 interface ThreatData {
   id?: string;
@@ -323,5 +324,8 @@ export default function DashboardPage() {
 
             </div>
             </div>
+
+          {/* VPN Censorship Intelligence Section */}
+      <VPNCensorshipIntelligence />
     );
 }
