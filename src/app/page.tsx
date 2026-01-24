@@ -31,16 +31,91 @@ const COUNTRIES = [
   { code: 'TH', name: 'Thailand' },
   { code: 'KP', name: 'North Korea' },
   { code: 'BY', name: 'Belarus' },
+    { code: 'PK', name: 'Pakistan' },
+  { code: 'EG', name: 'Egypt' },
+  { code: 'TR', name: 'Turkey' },
+  { code: 'SA', name: 'Saudi Arabia' },
+  { code: 'AE', name: 'UAE' },
+  { code: 'ID', name: 'Indonesia' },
+  { code: 'MY', name: 'Malaysia' },
+  { code: 'KZ', name: 'Kazakhstan' },
+  { code: 'UZ', name: 'Uzbekistan' },
+  { code: 'TM', name: 'Turkmenistan' },
+  { code: 'AZ', name: 'Azerbaijan' },
+  { code: 'UA', name: 'Ukraine' },
+  { code: 'VE', name: 'Venezuela' },
+  { code: 'BR', name: 'Brazil' },
+  { code: 'US', name: 'United States' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'FR', name: 'France' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'JP', name: 'Japan' },
+  { code: 'KR', name: 'South Korea' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'MX', name: 'Mexico' },
+  { code: 'AR', name: 'Argentina' },
+  { code: 'CL', name: 'Chile' },
+  { code: 'CO', name: 'Colombia' },
+  { code: 'PE', name: 'Peru' },
+  { code: 'ZA', name: 'South Africa' },
+  { code: 'NG', name: 'Nigeria' },
+  { code: 'KE', name: 'Kenya' },
+  { code: 'ET', name: 'Ethiopia' },
+  { code: 'GH', name: 'Ghana' },
+  { code: 'TZ', name: 'Tanzania' },
+  { code: 'UG', name: 'Uganda' },
+  { code: 'PL', name: 'Poland' },
+  { code: 'RO', name: 'Romania' },
+  { code: 'CZ', name: 'Czech Republic' },
+  { code: 'HU', name: 'Hungary' },
+  { code: 'GR', name: 'Greece' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'SE', name: 'Sweden' },
+  { code: 'NO', name: 'Norway' },
+  { code: 'FI', name: 'Finland' },
+  { code: 'DK', name: 'Denmark' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'BE', name: 'Belgium' },
+  { code: 'CH', name: 'Switzerland' },
+  { code: 'AT', name: 'Austria' },
+  { code: 'IE', name: 'Ireland' },
+  { code: 'NZ', name: 'New Zealand' },
+  { code: 'SG', name: 'Singapore' },
+  { code: 'PH', name: 'Philippines' },
+  { code: 'BD', name: 'Bangladesh' },
+  { code: 'MM', name: 'Myanmar' },
+  { code: 'LK', name: 'Sri Lanka' },
+  { code: 'NP', name: 'Nepal' },
+  { code: 'AF', name: 'Afghanistan' },
+  { code: 'IQ', name: 'Iraq' },
+  { code: 'YE', name: 'Yemen' },
+  { code: 'JO', name: 'Jordan' },
+  { code: 'LB', name: 'Lebanon' },
+  { code: 'PS', name: 'Palestine' },
+  { code: 'IL', name: 'Israel' },
+  { code: 'KW', name: 'Kuwait' },
+  { code: 'QA', name: 'Qatar' },
+  { code: 'BH', name: 'Bahrain' },
+  { code: 'OM', name: 'Oman' },
+  { code: 'DZ', name: 'Algeria' },
+  { code: 'MA', name: 'Morocco' },
+  { code: 'TN', name: 'Tunisia' },
+  { code: 'LY', name: 'Libya' },
+  { code: 'SD', name: 'Sudan' },
+  { code: 'SO', name: 'Somalia' },
+  { code: 'ER', name: 'Eritrea' },
+  { code: 'DJ', name: 'Djibouti' },
 ];
 
-const CATEGORIES = ['VPN', 'SOCIAL', 'NEWS', 'PORN', 'CRYPTO', 'SEARCH', 'POLITICAL', 'OTHER'];
-
+// const CATEGORIES = ['VPN', 'SOCIAL', 'NEWS', 'PORN', 'CRYPTO', 'SEARCH', 'POLITICAL', 'OTHER'];
 export default function DashboardPage() {
   const [threats, setThreats] = useState<ThreatData[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedStatus, setSelectedStatus] = useState('ALL');
+  // const [selectedCategories, setSelectedCategories] = useState<string[]>([]);  const [selectedStatus, setSelectedStatus] = useState('ALL');
   const [activeTab, setActiveTab] = useState('BLOCKED');
 
   useEffect(() => {
@@ -56,8 +131,9 @@ export default function DashboardPage() {
       if (selectedCountries.length > 0) {
         params.append('country', selectedCountries.join(','));
       }
-      if (selectedCategories.length > 0) {
-        params.append('category', selectedCategories.join(','));
+      // if (selectedCategories.length > 0) {
+            //   params.append('category', selectedCategories.join(','));
+            // }params.append('category', selectedCategories.join(','));
       }
       if (selectedStatus !== 'ALL') {
         params.append('status', selectedStatus);
@@ -107,7 +183,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-8">
         <h1 className="text-4xl font-bold mb-2">Global Internet Censorship Monitor</h1>
@@ -116,13 +192,13 @@ export default function DashboardPage() {
 
       <div className="max-w-7xl mx-auto p-6">
         {/* Filter Panel */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
-          <h2 className="text-xl font-bold mb-4 text-gray-900">🔍 Filters</h2>
+        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
+          <h2 className="text-xl font-bold mb-4 text-slate-100">🔍 Filters</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {/* Countries */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">Countries</label>
+              <label className="block text-sm font-semibold text-slate-300 mb-3">Countries</label>
               <select
                 multiple
                 value={selectedCountries}
@@ -138,7 +214,7 @@ export default function DashboardPage() {
 
             {/* Categories */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">Categories</label>
+              <label className="block text-sm font-semibold text-slate-300 mb-3">Categories</label>
               <select
                 multiple
                 value={selectedCategories}
@@ -154,7 +230,7 @@ export default function DashboardPage() {
 
             {/* Status */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">Status</label>
+              <label className="block text-sm font-semibold text-slate-300 mb-3">Status</label>
               <div className="space-y-2">
                 {['ALL', 'BLOCKED', 'ANOMALY', 'WORKING'].map(s => (
                   <button
@@ -163,7 +239,7 @@ export default function DashboardPage() {
                     className={`w-full px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
                       selectedStatus === s
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-gray-100 text-slate-300 hover:bg-gray-200'
                     }`}
                   >
                     {s === 'BLOCKED' ? '🔴' : s === 'ANOMALY' ? '🟠' : s === 'WORKING' ? '🟢' : '⚪'} {s}
@@ -174,7 +250,7 @@ export default function DashboardPage() {
 
             {/* Load Data */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">Action</label>
+              <label className="block text-sm font-semibold text-slate-300 mb-3">Action</label>
               <button
                 onClick={fetchData}
                 disabled={loading}
@@ -188,7 +264,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 border-b border-gray-300 mb-6 bg-white rounded-t-lg p-4">
+        <div className="flex gap-4 border-b border-gray-300 mb-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-t-lg p-4">
           {['BLOCKED', 'ANOMALY', 'WORKING'].map(tab => {
             const count = threats.filter(t => {
               if (tab === 'BLOCKED') return t.confirmed;
@@ -205,7 +281,7 @@ export default function DashboardPage() {
                     ? tab === 'BLOCKED' ? 'border-b-4 border-red-600 text-red-600'
                     : tab === 'ANOMALY' ? 'border-b-4 border-orange-600 text-orange-600'
                     : 'border-b-4 border-green-600 text-green-600'
-                    : 'text-gray-600 hover:text-gray-900'
+                    : 'text-gray-600 hover:text-slate-100'
                 }`}
               >
                 {tab === 'BLOCKED' ? '🔴' : tab === 'ANOMALY' ? '🟠' : '🟢'} {tab} ({count})
@@ -216,23 +292,22 @@ export default function DashboardPage() {
 
         {/* Data Table */}
         {filteredThreats.length > 0 ? (
-          <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-lg shadow-md overflow-hidden border border-gray-200">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-100 border-b border-gray-300">
                   <tr>
-                    <th className="px-4 py-3 text-left font-bold text-gray-700">🌍 Nation</th>
-                    <th className="px-4 py-3 text-left font-bold text-gray-700">📂 Category</th>
-                    <th className="px-4 py-3 text-left font-bold text-gray-700">🔗 Full URL</th>
-                    <th className="px-4 py-3 text-left font-bold text-gray-700">🌐 Domain</th>
-                    <th className="px-4 py-3 text-left font-bold text-gray-700">📍 Status</th>
-                    <th className="px-4 py-3 text-left font-bold text-gray-700">🕐 Last Tested</th>
-                  </tr>
+                    <th className="px-4 py-3 text-left font-bold text-slate-300">🌍 Nation</th>
+                    <th className="px-4 py-3 text-left font-bold text-slate-300">📂 Category</th>
+                    <th className="px-4 py-3 text-left font-bold text-slate-300">🔗 Full URL</th>
+                    <th className="px-4 py-3 text-left font-bold text-slate-300">🌐 Domain</th>
+                    <th className="px-4 py-3 text-left font-bold text-slate-300">📍 Status</th>
+                  <th className="px-4 py-3 text-left font-bold text-slate-300">🧪 Test Type</th>                  </tr>
                 </thead>
                 <tbody>
                   {filteredThreats.slice(0, 500).map((t, i) => (
                     <tr key={i} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 font-semibold text-gray-900">{t.probe_country_code}</td>
+                      <td className="px-4 py-3 font-semibold text-slate-100">{t.probe_country_code}</td>
                       <td className="px-4 py-3"><span className="bg-gray-200 px-2 py-1 rounded text-xs font-bold">{t.test_name}</span></td>
                       <td className="px-4 py-3">
                         <a href={t.input && t.input.startsWith('http') ? t.input : `https://${t.input}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline max-w-xs truncate block">
@@ -253,7 +328,7 @@ export default function DashboardPage() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-lg p-12 text-center text-gray-500">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-lg p-12 text-center text-gray-500">
             {loading ? '⏳ Loading threats...' : '❌ No threats found. Try adjusting your filters.'}
           </div>
         )}
