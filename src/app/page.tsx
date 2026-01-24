@@ -320,6 +320,7 @@ export default function DashboardPage() {
             <p className="text-sm text-yellow-800">⚠️ Showing first 500 of {filteredThreats.length} results</p>
           </div>
         )}
-  );
+
             </div>
+    );
 }
