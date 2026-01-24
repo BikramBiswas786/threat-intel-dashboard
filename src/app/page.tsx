@@ -115,9 +115,9 @@ export default function DashboardPage() {
   const [threats, setThreats] = useState<ThreatData[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
-  // const [selectedCategories, setSelectedCategories] = useState<string[]>([]);  const [selectedStatus, setSelectedStatus] = useState('ALL');
-  const [activeTab, setActiveTab] = useState('BLOCKED');
-
+  // const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState('ALL');
+    const [activeTab, setActiveTab] = useState('BLOCKED');
   useEffect(() => {
     // Auto-fetch on component mount
     fetchData();
@@ -133,11 +133,8 @@ export default function DashboardPage() {
       }
       // if (selectedCategories.length > 0) {
             //   params.append('category', selectedCategories.join(','));
-            // }params.append('category', selectedCategories.join(','));
-      }
-      if (selectedStatus !== 'ALL') {
-        params.append('status', selectedStatus);
-      }
+      // }      if (selectedStatus !== 'ALL') {
+      //   params.append('category', selectedCategories.join(','));      }
 
       const url = `https://threat-dashboard-backend.vercel.app/api/threats?${params.toString()}`;
       console.log('[FETCH] URL:', url);
