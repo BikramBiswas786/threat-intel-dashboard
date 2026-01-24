@@ -209,21 +209,6 @@ export default function DashboardPage() {
               <p className="text-xs text-gray-500 mt-2">Ctrl+Click to select multiple</p>
             </div>
 
-            {/* Categories */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-300 mb-3">Categories</label>
-              <select
-                multiple
-                value={selectedCategories}
-                onChange={(e) => setSelectedCategories(Array.from(e.target.selectedOptions, o => o.value))}
-                className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 min-h-[140px]"
-              >
-                {CATEGORIES.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500 mt-2">Ctrl+Click to select multiple</p>
-            </div>
 
             {/* Status */}
             <div>
