@@ -1,7 +1,10 @@
 @import "tailwindcss";
 
 :root {
-    --background: 222 47% 11%;
+  --background: 15 23 42;
+  --foreground: 226 232 240;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -11,13 +14,102 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 15 23 42;
+    --foreground: 226 232 240;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: rgb(15 23 42);
+  color: rgb(226 232 240);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Remove all white backgrounds */
+* {
+  background-color: transparent !important;
+}
+
+/* Set dark backgrounds for key elements */
+html {
+  background: rgb(15 23 42) !important;
+}
+
+body {
+  background: rgb(15 23 42) !important;
+}
+
+/* Main container */
+.container, main, div[class*="mx-auto"] {
+  background: rgb(15 23 42) !important;
+}
+
+/* Filter panel - dark blue-gray */
+div[class*="bg-white"], 
+div[class*="rounded"],
+section {
+  background: rgb(30 41 59) !important;
+}
+
+/* Table styling */
+table {
+  background: rgb(30 41 59) !important;
+}
+
+thead {
+  background: rgb(51 65 85) !important;
+}
+
+tbody tr {
+  background: rgb(30 41 59) !important;
+  border-bottom: 1px solid rgb(51 65 85);
+}
+
+tbody tr:hover {
+  background: rgb(51 65 85) !important;
+}
+
+/* Select dropdowns */
+select {
+  background: rgb(51 65 85) !important;
+  color: rgb(226 232 240) !important;
+  border: 1px solid rgb(71 85 105);
+}
+
+select option {
+  background: rgb(51 65 85) !important;
+  color: rgb(226 232 240) !important;
+}
+
+/* Input fields */
+input {
+  background: rgb(51 65 85) !important;
+  color: rgb(226 232 240) !important;
+  border: 1px solid rgb(71 85 105);
+}
+
+/* Buttons */
+button {
+  background: rgb(37 99 235) !important;
+  color: rgb(255 255 255) !important;
+}
+
+button:hover {
+  background: rgb(29 78 216) !important;
+}
+
+/* Status badges */
+.bg-red-100 {
+  background: rgb(127 29 29) !important;
+  color: rgb(254 202 202) !important;
+}
+
+.bg-orange-100 {
+  background: rgb(124 45 18) !important;
+  color: rgb(254 215 170) !important;
+}
+
+.bg-green-100 {
+  background: rgb(20 83 45) !important;
+  color: rgb(187 247 208) !important;
 }
