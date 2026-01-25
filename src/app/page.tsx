@@ -70,7 +70,6 @@ export default function DashboardPage() {
       setVpnData(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('[VPN Data] Error:', error);
-      alert(`Failed to load VPN data: ${error.message}\n\nPlease check:\n1. Dataset ID is correct\n2. Dataset exists in Apify\n3. Network connection is working`);
       setVpnData([]);
     }
     setLoading(false);
