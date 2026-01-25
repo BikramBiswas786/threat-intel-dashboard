@@ -2,16 +2,27 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const country = searchParams.get('country') || 'ALL';
-    
-    const backendUrl = 'https://threat-dashboard-backend.vercel.app';
-    const response = await fetch(`${backendUrl}/api/threats?country=${country}`);
-    
+
+    // Fetch data from Apify API
+    const apifyUrl = `https://api.apify.com/v2/datasets/eL63AeN6s48w5ouhH/items?token=${process.env.APIFY_API_TOKEN}`;
+    const response = await fetch(apifyUrl, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      next: { revalidate: 300 } // Cache for 5 minutes
+    });
+
     if (!response.ok) {
-      throw new Error(`Backend returned ${response.status}`);
+      throw new Error(`Apify API returned ${response.status}`);
     }
-    
-    const data = await response.json();
-    
+
+    let data = await response.json();
+
+    // Filter by country if specified
+    if (country && country !== 'ALL') {
+      data = data.filter((item: any) => item.country === country);
+    }
+
     return Response.json(data);
   } catch (error) {
     console.error('API proxy error:', error);
