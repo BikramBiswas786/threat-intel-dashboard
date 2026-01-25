@@ -19,7 +19,6 @@ export async function GET(request: Request) {
       .select('*', { count: 'exact' })
       .order('last_updated', { ascending: false });
 
-    // Filter by country if specified
     if (country && country !== 'ALL') {
       query = query.eq('country', country);
     }
