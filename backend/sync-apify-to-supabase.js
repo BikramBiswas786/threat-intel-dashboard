@@ -45,15 +45,17 @@ async function fetchFromApify(datasetId) {
 
 function transformData(rawData) {
   return rawData.map(item => ({
-    tool: item.toolName || item.tool || 'Unknown',
-    country: COUNTRY_CODES[item.country] || item.country,
-    country_code: item.country || item.countryCode,
-    status: item.blocked === true ? 'BLOCKED' : item.blocked === false ? 'WORKING' : 'ANOMALY',
-    confidence_score: item.confidence || item.confidenceScore || 0,
-    method: item.methods?.[0] || item.method2 || 'UNKNOWN',
-    source: item.sources?.[0] || item.source || 'Unknown',
-    last_updated: item.lastUpdated || item.lastChecked || new Date().toISOString(),
-    recommendation: item.recommendation || item.recommendation2 || ''
+    country: item.country || 'Unknown',
+    tool_id: item.toolId || 'unknown',
+    tool_name: item.toolName || 'Unknown',
+    category: item.category || null,
+    blocked: item.blocked === true,
+    confidence: item.confidence || 0,
+    methods: item.methods || [],
+    sources: item.sources || [],
+    recommendation: item.recommendation || '',
+    last_updated: item.lastUpdated || new Date().toISOString(),
+    nym_alternative: item.nymAlternative || null
   }));
 }
 
@@ -63,9 +65,9 @@ async function syncToSupabase(data) {
   try {
     // Upsert data (insert or update)
     const { data: result, error } = await supabase
-      .from('vpn_threats')
+      .from('threats')
       .upsert(data, { 
-        onConflict: 'tool,country_code',
+        onConflict:'tool_id,country',
         ignoreDuplicates: false 
       });
     
