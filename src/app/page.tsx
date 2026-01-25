@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 
-// Country code to name mapping
 const COUNTRY_MAP: Record<string, string> = {
   'AE': 'United Arab Emirates', 'AF': 'Afghanistan', 'AL': 'Albania', 'AZ': 'Azerbaijan', 'BD': 'Bangladesh',
   'BE': 'Belgium', 'BG': 'Bulgaria', 'BN': 'Brunei', 'BR': 'Brazil', 'BY': 'Belarus', 'CA': 'Canada',
@@ -75,31 +74,41 @@ export default function Dashboard() {
     }
   };
 
-  // Fetch data from backend API endpoint
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
         setError(null);
+        const allData: VPNThreat[] = [];
+        let page = 0;
+        let hasMore = true;
+        let totalRecords = 0;
 
-        const response = await fetch('/api/threats');
+        while (hasMore) {
+          const response = await fetch(`/api/threats?page=${page}`);
 
-        if (!response.ok) {
-          throw new Error(`API Error: ${response.status} ${response.statusText}`);
+          if (!response.ok) {
+            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+          }
+
+          const result = await response.json();
+          const pageData = result.data || [];
+          
+          if (!Array.isArray(pageData) || pageData.length === 0) {
+            hasMore = false;
+            break;
+          }
+
+          totalRecords = result.total || 0;
+          allData.push(...pageData);
+          
+          console.log(`📄 Loaded page ${page + 1}: ${pageData.length} records (Total: ${allData.length}/${totalRecords})`);
+          
+          hasMore = result.hasMore === true && pageData.length === 1000;
+          page++;
         }
 
-        const data = await response.json();
-
-        // API returns array directly, not wrapped in object
-        let vpnRecords = Array.isArray(data) ? data : (data.data || data.threats || []);
-
-        if (!Array.isArray(vpnRecords)) {
-          throw new Error('Invalid API response format - expected array');
-        }
-
-        // Map database fields to component interface with proper field mapping
-        const processedData: VPNThreat[] = vpnRecords.map((item: any) => {
-          // Correctly determine status from blocked field
+        const processedData: VPNThreat[] = allData.map((item: any) => {
           const status: 'BLOCKED' | 'WORKING' = item.blocked === true ? 'BLOCKED' : 'WORKING';
           
           return {
@@ -117,21 +126,19 @@ export default function Dashboard() {
         });
 
         setVpnData(processedData);
-        setError(null);
+        console.log(`✅ Successfully loaded ${processedData.length} total records from ${page} pages`);
 
       } catch (err) {
         console.error('Failed to fetch VPN data:', err);
         const message = err instanceof Error ? err.message : 'Failed to load VPN data';
         setError(message);
         setVpnData([]);
-
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  // Get unique values for filters - show country names in dropdown
   const countries = Array.from(
     new Set(vpnData.map(item => item.countryCode))
   ).sort();
@@ -142,7 +149,6 @@ export default function Dashboard() {
 
   const statuses = ['BLOCKED', 'WORKING'];
 
-  // Filter data based on selections
   const filteredData = vpnData.filter(item => {
     const matchCountry = selectedCountry === 'ALL' || item.countryCode === selectedCountry;
     const matchTool = selectedTool === 'ALL' || item.tool === selectedTool;
@@ -150,7 +156,6 @@ export default function Dashboard() {
     return matchCountry && matchTool && matchStatus;
   });
 
-  // Calculate statistics
   const stats = {
     blocked: vpnData.filter(item => item.status === 'BLOCKED').length,
     working: vpnData.filter(item => item.status === 'WORKING').length,
@@ -159,7 +164,6 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="mb-8 flex items-start justify-between gap-6">
           <div>
             <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-2">
@@ -188,30 +192,23 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Loading State */}
         {loading && (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              <p className="text-slate-300">⏳ Loading VPN censorship data...</p>
+              <p className="text-slate-300">⏳ Loading all VPN censorship data...</p>
             </div>
           </div>
         )}
 
-        {/* Error State */}
         {error && !loading && (
           <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 mb-6">
             <p className="text-red-200">⚠️ Error: {error}</p>
-            <p className="text-red-200 text-sm mt-1">
-              Please check your internet connection and refresh the page.
-            </p>
           </div>
         )}
 
-        {/* Success State */}
         {!loading && !error && vpnData.length > 0 && (
           <>
-            {/* Statistics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
                 <p className="text-slate-400 text-sm mb-1">Total Records</p>
@@ -227,14 +224,10 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Filters */}
             <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Country Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Country
-                  </label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Country</label>
                   <div className="relative">
                     <select
                       value={selectedCountry}
@@ -252,11 +245,8 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Tool Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    VPN Tool
-                  </label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">VPN Tool</label>
                   <div className="relative">
                     <select
                       value={selectedTool}
@@ -274,11 +264,8 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Status Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Status
-                  </label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
                   <div className="relative">
                     <select
                       value={selectedStatus}
@@ -298,7 +285,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Data Table */}
             <div className="bg-slate-700/50 border border-slate-600 rounded-lg overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -361,7 +347,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Footer Stats */}
             <div className="mt-6 text-center text-slate-400 text-sm">
               <p>
                 Showing {filteredData.length.toLocaleString()} of {vpnData.length.toLocaleString()} records
@@ -370,13 +355,9 @@ export default function Dashboard() {
           </>
         )}
 
-        {/* Empty State */}
         {!loading && !error && vpnData.length === 0 && (
           <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-12 text-center">
             <p className="text-slate-400 mb-4">No VPN censorship data found</p>
-            <p className="text-slate-500 text-sm">
-              The backend API might not have data yet. Check your Apify sync status.
-            </p>
           </div>
         )}
       </div>
