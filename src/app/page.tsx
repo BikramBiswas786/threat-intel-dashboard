@@ -44,6 +44,8 @@ export default function DashboardPage() {
     fetchVPNData();
   }, []);
 
+    // Multi-source VPN censorship data fetching
+    // Sources: 1. OONI via Apify  2. Tor Metrics  3. Nym Network  [+ 10 more sources planned]
   const fetchVPNData = async () => {
     setLoading(true);
     try {
@@ -53,6 +55,20 @@ export default function DashboardPage() {
       const data = await response.json();
       console.log('[VPN Data] Loaded:', data.length, 'records');
       setVpnData(data || []);
+
+            // Fetch Tor Metrics data
+            const torResponse = await fetch('https://onionoo.torproject.org/summary').catch(() => null);
+            if (torResponse && torResponse.ok) {
+                      const torData = await torResponse.json();
+                      console.log('[Tor Metrics] Loaded:', torData.relays_published);
+                    }
+
+            // Fetch Nym Network data
+            const nymResponse = await fetch('https://validator.nymtech.net/api/v1/status').catch(() => null);
+            if (nymResponse && nymResponse.ok) {
+                      const nymData = await nymResponse.json();
+                      console.log('[Nym Network] Network health loaded');
+                    }
     } catch (error) {
       console.error('[VPN Data] Error:', error);
     }
