@@ -69,18 +69,24 @@ export default function Dashboard() {
         }
 
         const data = await response.json();
+        console.log('API Response Type:', typeof data);
+        console.log('API Response Keys:', Object.keys(data).slice(0, 5));
+        console.log('First item:', data[0] || data.data?.[0]);
 
-        // ✅ FIX #2: Extract data using fallback chain (handles multiple API formats)
-        const vpnRecords = data.data || data.threats || [];
+        // ✅ FIX #2: API returns array directly, not wrapped in object
+        let vpnRecords = Array.isArray(data) ? data : (data.data || data.threats || []);
 
         if (!Array.isArray(vpnRecords)) {
-          throw new Error('Invalid API response format');
+          console.error('Invalid response type:', typeof vpnRecords, vpnRecords);
+          throw new Error('Invalid API response format - expected array');
         }
+
+        console.log('Records fetched:', vpnRecords.length);
 
         // ✅ FIX #3: Map database fields to component interface - UPDATED FOR ACTUAL SCHEMA
         const processedData: VPNThreat[] = vpnRecords.map((item: any) => {
           // Determine status based on blocked field only (no anomaly column)
-          const status: 'BLOCKED' | 'WORKING' = item.blocked ? 'BLOCKED' : 'WORKING';
+          const status: 'BLOCKED' | 'WORKING' = item.blocked === true ? 'BLOCKED' : 'WORKING';
           
           return {
             tool: item.tool_name || item.tool_id || 'Unknown',
