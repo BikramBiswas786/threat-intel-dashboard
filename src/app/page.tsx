@@ -40,17 +40,19 @@ export default function DashboardPage() {
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'BLOCKED' | 'ANOMALY' | 'WORKING'>('BLOCKED');
 
-  //   useEffect(() => {
-      // fetchVPNData();
-    // }, []);
+  useEffect(() => {
+    fetchVPNData();
+  }, []);
 
-    const fetchVPNData = async () => {
+  const fetchVPNData = async () => {
     setLoading(true);
     try {
       // Use environment variable or fallback to a default dataset
       const datasetId = process.env.NEXT_PUBLIC_APIFY_DATASET_ID || 'zO9mCVWlKxPd5qhaE';
       const apiToken = process.env.NEXT_PUBLIC_APIFY_API_TOKEN || '';
-      const apiUrl = `https://api.apify.com/v2/datasets/${datasetId}/items?format=json&clean=true${apiToken ? `&token=${apiToken}` : ''}`;      console.log('[VPN Data] Fetching from:', apiUrl);
+      const apiUrl = `https://api.apify.com/v2/datasets/${datasetId}/items?format=json&clean=true${apiToken ? `&token=${apiToken}` : ''}`;
+      
+      console.log('[VPN Data] Fetching from:', apiUrl);
       const response = await fetch(apiUrl);
       
       // Check if response is OK
@@ -66,13 +68,24 @@ export default function DashboardPage() {
       }
       
       console.log('[VPN Data] Loaded:', data.length, 'records');
-      setVpnData(Array.isArray(data) ? data : []);
+      
+      // Extract VPN data safely with fallback chain
+      const vpnList = data?.data || data?.threats || [];
+      
+      // Validate it's actually an array
+      if (Array.isArray(vpnList)) {
+        setVpnData(vpnList);
+      } else {
+        console.warn('Invalid VPN data structure:', data);
+        setVpnData([]);
+      }
+      
     } catch (error) {
       console.error('[VPN Data] Error:', error);
       setVpnData([]);
     }
     setLoading(false);
-  };};
+  };
 
   const filteredData = vpnData.filter(item => {
     const statusMatch = item.status === activeTab;
@@ -137,18 +150,18 @@ export default function DashboardPage() {
               <button
                 onClick={fetchVPNData}
                 disabled={loading}
-                className="w-full px-4 py-3 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 text-white font-bold py-3 px-6 rounded-lg transition-colors"
               >
                 {loading ? '⏳ Loading...' : '📊 Refresh Data'}
               </button>
               <p className="text-xs text-gray-400 mt-2">Total: {vpnData.length} records</p>
-              <p className="text-xs text-purple-300 mt-1">Filtered: {filteredData.length} results</p>
+              <p className="text-xs text-gray-400">Filtered: {filteredData.length} results</p>
             </div>
           </div>
         </div>
 
         {/* Status Tabs */}
-        <div className="flex gap-4 border-b border-gray-600 mb-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-t-lg p-4">
+        <div className="flex gap-4 mb-6 border-b border-slate-700">
           {['BLOCKED', 'ANOMALY', 'WORKING'].map(tab => {
             const count = tab === 'BLOCKED' ? blockedCount : tab === 'ANOMALY' ? anomalyCount : workingCount;
             return (
@@ -157,9 +170,11 @@ export default function DashboardPage() {
                 onClick={() => setActiveTab(tab as any)}
                 className={`px-4 py-2 font-bold text-sm transition-colors ${
                   activeTab === tab
-                    ? tab === 'BLOCKED' ? 'border-b-4 border-red-600 text-red-400'
-                    : tab === 'ANOMALY' ? 'border-b-4 border-orange-600 text-orange-400'
-                    : 'border-b-4 border-green-600 text-green-400'
+                    ? tab === 'BLOCKED'
+                      ? 'border-b-4 border-red-600 text-red-400'
+                      : tab === 'ANOMALY'
+                      ? 'border-b-4 border-orange-600 text-orange-400'
+                      : 'border-b-4 border-green-600 text-green-400'
                     : 'text-gray-400 hover:text-slate-100'
                 }`}
               >
@@ -171,56 +186,54 @@ export default function DashboardPage() {
 
         {/* Data Table */}
         {filteredData.length > 0 ? (
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-lg shadow-md overflow-hidden">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-slate-700/50 border-b border-gray-600">
+              <table className="min-w-full text-sm">
+                <thead className="bg-slate-700 text-slate-200">
                   <tr>
-                    <th className="px-4 py-3 text-left font-bold text-slate-200">🛡️ VPN Tool</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-200">🌍 Country</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-200">📍 Status</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-200">🎯 Confidence</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-200">🔍 Method</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-200">📡 Source</th>
+                    <th className="px-4 py-3 text-left font-bold">🛡️ VPN Tool</th>
+                    <th className="px-4 py-3 text-left font-bold">🌍 Country</th>
+                    <th className="px-4 py-3 text-left font-bold">📍 Status</th>
+                    <th className="px-4 py-3 text-left font-bold">🎯 Confidence</th>
+                    <th className="px-4 py-3 text-left font-bold">🔍 Method</th>
+                    <th className="px-4 py-3 text-left font-bold">📡 Source</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredData.slice(0, 500).map((item, i) => (
-                    <tr key={i} className="border-b border-gray-700 hover:bg-slate-700/30 transition-colors">
-                      <td className="px-4 py-3 font-semibold text-purple-300">{item.tool.toUpperCase()}</td>
-                      <td className="px-4 py-3 text-slate-100">
-                        {item.country} <span className="text-gray-400">({item.countryCode})</span>
-                      </td>
+                    <tr key={i} className="border-b border-slate-700 hover:bg-slate-700/50">
+                      <td className="px-4 py-3 font-mono text-purple-400">{item.tool?.toUpperCase() || 'N/A'}</td>
+                      <td className="px-4 py-3 text-slate-300">{item.country || 'Unknown'} ({item.countryCode || ''})</td>
                       <td className="px-4 py-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          item.status === 'BLOCKED' ? 'bg-red-900/50 text-red-300'
-                          : item.status === 'ANOMALY' ? 'bg-orange-900/50 text-orange-300'
-                          : 'bg-green-900/50 text-green-300'
+                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                          item.status === 'BLOCKED'
+                            ? 'bg-red-900 text-red-300'
+                            : item.status === 'ANOMALY'
+                            ? 'bg-orange-900 text-orange-300'
+                            : 'bg-green-900 text-green-300'
                         }`}>
                           {item.status === 'BLOCKED' ? '🔴 BLOCKED' : item.status === 'ANOMALY' ? '🟠 ANOMALY' : '🟢 WORKING'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-slate-100">
+                      <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-16 bg-gray-700 rounded-full h-2">
-                            <div 
+                          <div className="flex-1 bg-slate-700 rounded-full h-2 max-w-[100px]">
+                            <div
                               className={`h-2 rounded-full ${
-                                item.confidenceScore >= 80 ? 'bg-green-500' 
-                                : item.confidenceScore >= 50 ? 'bg-yellow-500' 
-                                : 'bg-red-500'
+                                (item.confidenceScore || 0) >= 80
+                                  ? 'bg-green-500'
+                                  : (item.confidenceScore || 0) >= 50
+                                  ? 'bg-yellow-500'
+                                  : 'bg-red-500'
                               }`}
-                              style={{ width: `${item.confidenceScore}%` }}
+                              style={{ width: `${item.confidenceScore || 0}%` }}
                             />
                           </div>
-                          <span className="text-xs">{item.confidenceScore}%</span>
+                          <span className="text-slate-300 text-xs">{item.confidenceScore || 0}%</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-gray-400 text-xs">{item.method || 'N/A'}</td>
-                      <td className="px-4 py-3">
-                        <span className="bg-blue-900/30 text-blue-300 px-2 py-1 rounded text-xs">
-                          {item.source}
-                        </span>
-                      </td>
+                      <td className="px-4 py-3 text-slate-400 text-xs">{item.method || 'N/A'}</td>
+                      <td className="px-4 py-3 text-slate-400 text-xs">{item.source || 'N/A'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -228,14 +241,14 @@ export default function DashboardPage() {
             </div>
           </div>
         ) : (
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-lg p-12 text-center text-gray-400">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-lg p-12 text-center text-slate-400">
             {loading ? '⏳ Loading VPN data...' : '❌ No VPN data found. Click Refresh Data button.'}
           </div>
         )}
 
         {filteredData.length > 500 && (
-          <div className="mt-4 p-4 bg-yellow-900/30 border border-yellow-600/30 rounded-lg text-center">
-            <p className="text-sm text-yellow-300">⚠️ Showing first 500 of {filteredData.length} results</p>
+          <div className="mt-4 p-4 bg-yellow-900/30 border border-yellow-600 rounded-lg text-yellow-300 text-sm">
+            ⚠️ Showing first 500 of {filteredData.length} results
           </div>
         )}
       </div>
