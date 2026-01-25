@@ -40,9 +40,9 @@ export default function DashboardPage() {
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'BLOCKED' | 'ANOMALY' | 'WORKING'>('BLOCKED');
 
-  useEffect(() => {
-    fetchVPNData();
-  }, []);
+  //   useEffect(() => {
+      // fetchVPNData();
+    // }, []);
 
     const fetchVPNData = async () => {
     setLoading(true);
