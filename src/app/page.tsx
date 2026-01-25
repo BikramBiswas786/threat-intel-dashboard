@@ -21,6 +21,37 @@ export default function Dashboard() {
   const [selectedCountry, setSelectedCountry] = useState('ALL');
   const [selectedTool, setSelectedTool] = useState('ALL');
   const [selectedStatus, setSelectedStatus] = useState('ALL');
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+
+  const handleSync = async () => {
+    try {
+      setSyncing(true);
+      setSyncMessage('🔄 Syncing data from Apify...');
+      
+      const response = await fetch('/api/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+
+      if (!response.ok) {
+        throw new Error(`Sync failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setSyncMessage(`✅ Synced ${data.synced} records! Refreshing...`);
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Sync failed';
+      setSyncMessage(`❌ Error: ${message}`);
+      setSyncing(false);
+    }
+  };
 
   // Fetch data from backend API endpoint instead of Apify directly
   useEffect(() => {
@@ -106,14 +137,33 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-2">
-            🔐 VPN Censorship Intelligence
-          </h1>
-          <p className="text-slate-300">
-            Real-time monitoring of 35+ VPN tools across 195 countries
-          </p>
+        <div className="mb-8 flex items-start justify-between gap-6">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-2">
+              🔐 VPN Censorship Intelligence
+            </h1>
+            <p className="text-slate-300">
+              Real-time monitoring of 35+ VPN tools across 195 countries
+            </p>
+          </div>
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg font-medium transition-colors whitespace-nowrap"
+          >
+            {syncing ? '🔄 Syncing...' : '🔄 Sync Data'}
+          </button>
         </div>
+
+        {syncMessage && (
+          <div className={`mb-4 p-3 rounded-lg border ${
+            syncMessage.includes('Error') 
+              ? 'bg-red-500/10 border-red-500/50 text-red-200' 
+              : 'bg-blue-500/10 border-blue-500/50 text-blue-200'
+          }`}>
+            {syncMessage}
+          </div>
+        )}
 
         {/* Loading State */}
         {loading && (
