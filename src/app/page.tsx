@@ -86,7 +86,7 @@ export default function DashboardPage() {
   const workingCount = vpnData.filter(d => d.status === 'WORKING').length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 to-indigo-700 text-white p-8">
         <h1 className="text-4xl font-bold mb-2">🛡️ VPN Censorship Intelligence</h1>
