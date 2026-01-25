@@ -48,7 +48,7 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       const response = await fetch(
-        'https://api.apify.com/v2/actors/iHdE6ioDAlXzBy1Yu/runs/last/dataset/items?format=json&clean=true'
+                'https://api.apify.com/v2/datasets/zD9mCVWiKxPAjq5haE/items?format=json&clean=true'
       );
       const data = await response.json();
       console.log('[VPN Data] Loaded:', data.length, 'records');
