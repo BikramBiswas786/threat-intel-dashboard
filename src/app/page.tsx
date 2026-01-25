@@ -67,23 +67,21 @@ export default function DashboardPage() {
                   console.log('✅ OONI (via Apify):', data?.length || 0, 'records');
                   console.log('✅ Tor Metrics: Integrated');
                   console.log('✅ Nym Network: Integrated');
-                  console.log('⏳ More sources coming: ProtonVPN, NordVPN, ExpressVPN, GFWatch...');;
-
+                  console.log('⏳ More sources coming: ProtonVPN, NordVPN, ExpressVPN, GFWatch...')
             // Fetch Nym Network data
             const nymResponse = await fetch('https://validator.nymtech.net/api/v1/status').catch(() => null);
             if (nymResponse && nymResponse.ok) {
                       const nymData = await nymResponse.json();
                       console.log('[Nym Network] Network health loaded');
                     }
+                    }
     } catch (error) {
       console.error('[VPN Data] Error:', error);
     }
-    setLoading(fal      };
-  };
-
+    setLoading(false);
+      };
   const filteredData = vpnData.filter(item => {
-    const statusMatch = item.status === activeTab;
-    const countryMatch = selectedCountries.length === 0 || selectedCountries.includes(item.countryCode);
+    setLoading(false);    const countryMatch = selectedCountries.length === 0 || selectedCountries.includes(item.countryCode);
     const toolMatch = selectedTools.length === 0 || selectedTools.includes(item.tool.toLowerCase());
     return statusMatch && countryMatch && toolMatch;
   });
