@@ -6,10 +6,11 @@ interface VPNThreat {
   tool: string;
   country: string;
   countryCode: string;
-  status: 'BLOCKED' | 'WORKING' | 'ANOMALY';
+  status: 'BLOCKED' | 'WORKING';
   confidenceScore: number;
   method: string | string[];
   source: string | string[];
+  category: string;
   lastChecked: string;
   recommendation: string;
 }
@@ -76,9 +77,11 @@ export default function Dashboard() {
           throw new Error('Invalid API response format');
         }
 
-        // ✅ FIX #3: Map database fields to component interface with proper type casting
+        // ✅ FIX #3: Map database fields to component interface - UPDATED FOR ACTUAL SCHEMA
         const processedData: VPNThreat[] = vpnRecords.map((item: any) => {
-          const status: 'BLOCKED' | 'WORKING' | 'ANOMALY' = item.blocked ? 'BLOCKED' : item.anomaly ? 'ANOMALY' : 'WORKING';
+          // Determine status based on blocked field only (no anomaly column)
+          const status: 'BLOCKED' | 'WORKING' = item.blocked ? 'BLOCKED' : 'WORKING';
+          
           return {
             tool: item.tool_name || item.tool_id || 'Unknown',
             country: item.country || 'Unknown',
@@ -87,6 +90,7 @@ export default function Dashboard() {
             confidenceScore: (item.confidence || 0) * 100,
             method: Array.isArray(item.methods) ? item.methods : item.method || 'Unknown',
             source: Array.isArray(item.sources) ? item.sources : item.source || 'Unknown',
+            category: item.category || 'Unknown',
             lastChecked: item.last_updated || item.timestamp || new Date().toISOString(),
             recommendation: item.recommendation || (item.blocked ? 'Use alternative VPN' : 'Tool working normally')
           };
@@ -116,7 +120,7 @@ export default function Dashboard() {
     new Set(vpnData.map(item => item.tool))
   ).sort();
 
-  const statuses = ['BLOCKED', 'ANOMALY', 'WORKING'];
+  const statuses = ['BLOCKED', 'WORKING'];
 
   // Filter data based on selections
   const filteredData = vpnData.filter(item => {
@@ -129,7 +133,6 @@ export default function Dashboard() {
   // Calculate statistics
   const stats = {
     blocked: vpnData.filter(item => item.status === 'BLOCKED').length,
-    anomaly: vpnData.filter(item => item.status === 'ANOMALY').length,
     working: vpnData.filter(item => item.status === 'WORKING').length,
   };
 
@@ -189,7 +192,7 @@ export default function Dashboard() {
         {!loading && !error && vpnData.length > 0 && (
           <>
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
                 <p className="text-slate-400 text-sm mb-1">Total Records</p>
                 <p className="text-3xl font-bold text-white">{vpnData.length}</p>
@@ -197,10 +200,6 @@ export default function Dashboard() {
               <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
                 <p className="text-red-300 text-sm mb-1">🔴 Blocked</p>
                 <p className="text-3xl font-bold text-red-300">{stats.blocked}</p>
-              </div>
-              <div className="bg-yellow-500/10 border border-yellow-500/50 rounded-lg p-4">
-                <p className="text-yellow-300 text-sm mb-1">⚠️ Anomalies</p>
-                <p className="text-3xl font-bold text-yellow-300">{stats.anomaly}</p>
               </div>
               <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-4">
                 <p className="text-green-300 text-sm mb-1">✅ Working</p>
@@ -289,7 +288,7 @@ export default function Dashboard() {
                       <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Country</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Status</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Confidence</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Method</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Category</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Last Checked</th>
                     </tr>
                   </thead>
@@ -311,21 +310,17 @@ export default function Dashboard() {
                               className={`px-3 py-1 rounded text-sm font-medium ${
                                 item.status === 'BLOCKED'
                                   ? 'bg-red-500/20 text-red-300'
-                                  : item.status === 'ANOMALY'
-                                  ? 'bg-yellow-500/20 text-yellow-300'
                                   : 'bg-green-500/20 text-green-300'
                               }`}
                             >
-                              {item.status === 'BLOCKED' && '🔴'} {item.status === 'ANOMALY' && '⚠️'} {item.status === 'WORKING' && '✅'} {item.status}
+                              {item.status === 'BLOCKED' && '🔴'} {item.status === 'WORKING' && '✅'} {item.status}
                             </span>
                           </td>
                           <td className="px-6 py-4">
                             <span className="text-slate-300">{item.confidenceScore.toFixed(1)}%</span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-slate-300 text-sm">
-                              {Array.isArray(item.method) ? item.method.join(', ') : item.method}
-                            </span>
+                            <span className="text-slate-300 text-sm">{item.category}</span>
                           </td>
                           <td className="px-6 py-4">
                             <span className="text-slate-400 text-sm">
