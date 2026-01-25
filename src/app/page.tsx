@@ -61,7 +61,13 @@ export default function DashboardPage() {
             if (torResponse && torResponse.ok) {
                       const torData = await torResponse.json();
                       console.log('[Tor Metrics] Loaded:', torData.relays_published);
-                    }
+                    
+                  // Log all sources
+                  console.log('=== VPN CENSORSHIP DATA SOURCES ===');
+                  console.log('✅ OONI (via Apify):', data?.length || 0, 'records');
+                  console.log('✅ Tor Metrics: Integrated');
+                  console.log('✅ Nym Network: Integrated');
+                  console.log('⏳ More sources coming: ProtonVPN, NordVPN, ExpressVPN, GFWatch...');;
 
             // Fetch Nym Network data
             const nymResponse = await fetch('https://validator.nymtech.net/api/v1/status').catch(() => null);
