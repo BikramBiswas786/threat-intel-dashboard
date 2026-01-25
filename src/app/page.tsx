@@ -78,7 +78,7 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('[VPN Data] Error:', error);
     }
-    setLoading(false);
+    setLoading(fal      };
   };
 
   const filteredData = vpnData.filter(item => {
