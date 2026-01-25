@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
 
 interface VPNThreat {
   tool: string;
@@ -168,7 +167,7 @@ export default function Dashboard() {
                     <select
                       value={selectedCountry}
                       onChange={(e) => setSelectedCountry(e.target.value)}
-                      className="w-full appearance-none bg-slate-600 text-white px-4 py-2 rounded border border-slate-500 focus:outline-none focus:border-blue-500"
+                      className="w-full appearance-none bg-slate-600 text-white px-4 py-2 pr-8 rounded border border-slate-500 focus:outline-none focus:border-blue-500"
                     >
                       <option value="ALL">All Countries ({countries.length})</option>
                       {countries.map(country => (
@@ -177,7 +176,7 @@ export default function Dashboard() {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <div className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none">▼</div>
                   </div>
                 </div>
 
@@ -190,7 +189,7 @@ export default function Dashboard() {
                     <select
                       value={selectedTool}
                       onChange={(e) => setSelectedTool(e.target.value)}
-                      className="w-full appearance-none bg-slate-600 text-white px-4 py-2 rounded border border-slate-500 focus:outline-none focus:border-blue-500"
+                      className="w-full appearance-none bg-slate-600 text-white px-4 py-2 pr-8 rounded border border-slate-500 focus:outline-none focus:border-blue-500"
                     >
                       <option value="ALL">All Tools ({tools.length})</option>
                       {tools.map(tool => (
@@ -199,7 +198,7 @@ export default function Dashboard() {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <div className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none">▼</div>
                   </div>
                 </div>
 
@@ -212,7 +211,7 @@ export default function Dashboard() {
                     <select
                       value={selectedStatus}
                       onChange={(e) => setSelectedStatus(e.target.value)}
-                      className="w-full appearance-none bg-slate-600 text-white px-4 py-2 rounded border border-slate-500 focus:outline-none focus:border-blue-500"
+                      className="w-full appearance-none bg-slate-600 text-white px-4 py-2 pr-8 rounded border border-slate-500 focus:outline-none focus:border-blue-500"
                     >
                       <option value="ALL">All Status</option>
                       {statuses.map(status => (
@@ -221,7 +220,7 @@ export default function Dashboard() {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <div className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none">▼</div>
                   </div>
                 </div>
               </div>
