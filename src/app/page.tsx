@@ -2,6 +2,27 @@
 
 import { useState, useEffect } from 'react';
 
+// Country code to name mapping
+const COUNTRY_MAP: Record<string, string> = {
+  'AE': 'United Arab Emirates', 'AF': 'Afghanistan', 'AL': 'Albania', 'AZ': 'Azerbaijan', 'BD': 'Bangladesh',
+  'BE': 'Belgium', 'BG': 'Bulgaria', 'BN': 'Brunei', 'BR': 'Brazil', 'BY': 'Belarus', 'CA': 'Canada',
+  'CH': 'Switzerland', 'CN': 'China', 'CZ': 'Czech Republic', 'DE': 'Germany', 'DK': 'Denmark',
+  'EG': 'Egypt', 'ES': 'Spain', 'FR': 'France', 'GB': 'United Kingdom', 'GR': 'Greece', 'HK': 'Hong Kong',
+  'HR': 'Croatia', 'HU': 'Hungary', 'ID': 'Indonesia', 'IE': 'Ireland', 'IL': 'Israel', 'IN': 'India',
+  'IR': 'Iran', 'IT': 'Italy', 'JM': 'Jamaica', 'JO': 'Jordan', 'JP': 'Japan', 'KE': 'Kenya', 'KR': 'South Korea',
+  'KZ': 'Kazakhstan', 'LB': 'Lebanon', 'LT': 'Lithuania', 'LU': 'Luxembourg', 'LV': 'Latvia', 'MA': 'Morocco',
+  'MM': 'Myanmar', 'MX': 'Mexico', 'MY': 'Malaysia', 'NG': 'Nigeria', 'NL': 'Netherlands', 'NO': 'Norway',
+  'NP': 'Nepal', 'NZ': 'New Zealand', 'PA': 'Panama', 'PE': 'Peru', 'PH': 'Philippines', 'PK': 'Pakistan',
+  'PL': 'Poland', 'PT': 'Portugal', 'RO': 'Romania', 'RS': 'Serbia', 'RU': 'Russia', 'SA': 'Saudi Arabia',
+  'SE': 'Sweden', 'SG': 'Singapore', 'SI': 'Slovenia', 'SK': 'Slovakia', 'TH': 'Thailand', 'TR': 'Turkey',
+  'TW': 'Taiwan', 'UA': 'Ukraine', 'US': 'United States', 'VE': 'Venezuela', 'VN': 'Vietnam', 'YE': 'Yemen',
+  'ZA': 'South Africa', 'ZM': 'Zambia', 'ZW': 'Zimbabwe'
+};
+
+function getCountryName(code: string): string {
+  return COUNTRY_MAP[code?.toUpperCase()] || code || 'Unknown';
+}
+
 interface VPNThreat {
   tool: string;
   country: string;
@@ -54,14 +75,13 @@ export default function Dashboard() {
     }
   };
 
-  // Fetch data from backend API endpoint instead of Apify directly
+  // Fetch data from backend API endpoint
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // ✅ FIX #1: Use your backend API endpoint instead of Apify
         const response = await fetch('/api/threats');
 
         if (!response.ok) {
@@ -69,28 +89,22 @@ export default function Dashboard() {
         }
 
         const data = await response.json();
-        console.log('API Response Type:', typeof data);
-        console.log('API Response Keys:', Object.keys(data).slice(0, 5));
-        console.log('First item:', data[0] || data.data?.[0]);
 
-        // ✅ FIX #2: API returns array directly, not wrapped in object
+        // API returns array directly, not wrapped in object
         let vpnRecords = Array.isArray(data) ? data : (data.data || data.threats || []);
 
         if (!Array.isArray(vpnRecords)) {
-          console.error('Invalid response type:', typeof vpnRecords, vpnRecords);
           throw new Error('Invalid API response format - expected array');
         }
 
-        console.log('Records fetched:', vpnRecords.length);
-
-        // ✅ FIX #3: Map database fields to component interface - UPDATED FOR ACTUAL SCHEMA
+        // Map database fields to component interface with proper field mapping
         const processedData: VPNThreat[] = vpnRecords.map((item: any) => {
-          // Determine status based on blocked field only (no anomaly column)
+          // Correctly determine status from blocked field
           const status: 'BLOCKED' | 'WORKING' = item.blocked === true ? 'BLOCKED' : 'WORKING';
           
           return {
             tool: item.tool_name || item.tool_id || 'Unknown',
-            country: item.country || 'Unknown',
+            country: getCountryName(item.country),
             countryCode: item.country || 'Unknown',
             status,
             confidenceScore: (item.confidence || 0) * 100,
@@ -117,7 +131,7 @@ export default function Dashboard() {
     })();
   }, []);
 
-  // Get unique values for filters
+  // Get unique values for filters - show country names in dropdown
   const countries = Array.from(
     new Set(vpnData.map(item => item.countryCode))
   ).sort();
@@ -201,15 +215,15 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
                 <p className="text-slate-400 text-sm mb-1">Total Records</p>
-                <p className="text-3xl font-bold text-white">{vpnData.length}</p>
+                <p className="text-3xl font-bold text-white">{vpnData.length.toLocaleString()}</p>
               </div>
               <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
                 <p className="text-red-300 text-sm mb-1">🔴 Blocked</p>
-                <p className="text-3xl font-bold text-red-300">{stats.blocked}</p>
+                <p className="text-3xl font-bold text-red-300">{stats.blocked.toLocaleString()}</p>
               </div>
               <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-4">
                 <p className="text-green-300 text-sm mb-1">✅ Working</p>
-                <p className="text-3xl font-bold text-green-300">{stats.working}</p>
+                <p className="text-3xl font-bold text-green-300">{stats.working.toLocaleString()}</p>
               </div>
             </div>
 
@@ -228,9 +242,9 @@ export default function Dashboard() {
                       className="w-full appearance-none bg-slate-600 text-white px-4 py-2 pr-8 rounded border border-slate-500 focus:outline-none focus:border-blue-500"
                     >
                       <option value="ALL">All Countries ({countries.length})</option>
-                      {countries.map(country => (
-                        <option key={country} value={country}>
-                          {country}
+                      {countries.map(code => (
+                        <option key={code} value={code}>
+                          {getCountryName(code)} ({code})
                         </option>
                       ))}
                     </select>
@@ -274,7 +288,7 @@ export default function Dashboard() {
                       <option value="ALL">All Status</option>
                       {statuses.map(status => (
                         <option key={status} value={status}>
-                          {status} ({vpnData.filter(item => item.status === status).length})
+                          {status} ({vpnData.filter(item => item.status === status).length.toLocaleString()})
                         </option>
                       ))}
                     </select>
@@ -287,33 +301,33 @@ export default function Dashboard() {
             {/* Data Table */}
             <div className="bg-slate-700/50 border border-slate-600 rounded-lg overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-slate-600 border-b border-slate-500">
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Tool</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Country</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Status</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Confidence</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Category</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Last Checked</th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-200">Tool</th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-200">Country</th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-200">Status</th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-200">Confidence</th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-200">Category</th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-200">Last Checked</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredData.length > 0 ? (
                       filteredData.map((item, idx) => (
                         <tr
-                          key={`${item.tool}-${item.country}-${idx}`}
+                          key={`${item.tool}-${item.countryCode}-${idx}`}
                           className="border-b border-slate-600 hover:bg-slate-600/50 transition-colors"
                         >
-                          <td className="px-6 py-4">
+                          <td className="px-4 py-3">
                             <span className="font-medium text-slate-100">{item.tool}</span>
                           </td>
-                          <td className="px-6 py-4">
-                            <span className="text-slate-300">{item.countryCode}</span>
+                          <td className="px-4 py-3">
+                            <span className="text-slate-300">{item.country}</span>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-4 py-3">
                             <span
-                              className={`px-3 py-1 rounded text-sm font-medium ${
+                              className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold ${
                                 item.status === 'BLOCKED'
                                   ? 'bg-red-500/20 text-red-300'
                                   : 'bg-green-500/20 text-green-300'
@@ -322,14 +336,14 @@ export default function Dashboard() {
                               {item.status === 'BLOCKED' && '🔴'} {item.status === 'WORKING' && '✅'} {item.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4">
-                            <span className="text-slate-300">{item.confidenceScore.toFixed(1)}%</span>
+                          <td className="px-4 py-3">
+                            <span className="text-slate-300 font-mono">{item.confidenceScore.toFixed(1)}%</span>
                           </td>
-                          <td className="px-6 py-4">
-                            <span className="text-slate-300 text-sm">{item.category}</span>
+                          <td className="px-4 py-3">
+                            <span className="text-slate-300 text-xs">{item.category}</span>
                           </td>
-                          <td className="px-6 py-4">
-                            <span className="text-slate-400 text-sm">
+                          <td className="px-4 py-3">
+                            <span className="text-slate-400 text-xs">
                               {new Date(item.lastChecked).toLocaleDateString()}
                             </span>
                           </td>
@@ -337,7 +351,7 @@ export default function Dashboard() {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={6} className="px-6 py-8 text-center">
+                        <td colSpan={6} className="px-4 py-8 text-center">
                           <p className="text-slate-400">No records match your filters</p>
                         </td>
                       </tr>
@@ -350,7 +364,7 @@ export default function Dashboard() {
             {/* Footer Stats */}
             <div className="mt-6 text-center text-slate-400 text-sm">
               <p>
-                Showing {filteredData.length} of {vpnData.length} records
+                Showing {filteredData.length.toLocaleString()} of {vpnData.length.toLocaleString()} records
               </p>
             </div>
           </>
