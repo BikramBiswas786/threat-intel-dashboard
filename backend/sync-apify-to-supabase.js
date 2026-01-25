@@ -9,8 +9,7 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC
 // Apify Actor Dataset IDs (Both actors)
 const APIFY_DATASETS = [
   process.env.APIFY_DATASET_1 || 'eL63AeN6s48w5ouhH', // Main VPN data
-  process.env.APIFY_DATASET_2 || '' // Second actor dataset
-];
+  process.env.APIFY_DATASET_2 || 'RB3y4bcqrE1y31C3Jt' // Second actor dataset (OONI)];
 
 // Initialize Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
