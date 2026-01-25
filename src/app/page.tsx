@@ -45,18 +45,21 @@ export default function Dashboard() {
           throw new Error('Invalid API response format');
         }
 
-        // ✅ FIX #3: Map database fields to component interface
-        const processedData = vpnRecords.map((item: any) => ({
-          tool: item.tool_name || item.tool_id || 'Unknown',
-          country: item.country || 'Unknown',
-          countryCode: item.country || 'Unknown',
-          status: item.blocked ? 'BLOCKED' : item.anomaly ? 'ANOMALY' : 'WORKING',
-          confidenceScore: (item.confidence || 0) * 100,
-          method: Array.isArray(item.methods) ? item.methods : item.method || 'Unknown',
-          source: Array.isArray(item.sources) ? item.sources : item.source || 'Unknown',
-          lastChecked: item.last_updated || item.timestamp || new Date().toISOString(),
-          recommendation: item.recommendation || (item.blocked ? 'Use alternative VPN' : 'Tool working normally')
-        }));
+        // ✅ FIX #3: Map database fields to component interface with proper type casting
+        const processedData: VPNThreat[] = vpnRecords.map((item: any) => {
+          const status: 'BLOCKED' | 'WORKING' | 'ANOMALY' = item.blocked ? 'BLOCKED' : item.anomaly ? 'ANOMALY' : 'WORKING';
+          return {
+            tool: item.tool_name || item.tool_id || 'Unknown',
+            country: item.country || 'Unknown',
+            countryCode: item.country || 'Unknown',
+            status,
+            confidenceScore: (item.confidence || 0) * 100,
+            method: Array.isArray(item.methods) ? item.methods : item.method || 'Unknown',
+            source: Array.isArray(item.sources) ? item.sources : item.source || 'Unknown',
+            lastChecked: item.last_updated || item.timestamp || new Date().toISOString(),
+            recommendation: item.recommendation || (item.blocked ? 'Use alternative VPN' : 'Tool working normally')
+          };
+        });
 
         setVpnData(processedData);
         setError(null);
