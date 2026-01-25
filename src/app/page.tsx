@@ -49,9 +49,8 @@ export default function DashboardPage() {
     try {
       // Use environment variable or fallback to a default dataset
       const datasetId = process.env.NEXT_PUBLIC_APIFY_DATASET_ID || 'zO9mCVWlKxPd5qhaE';
-      const apiUrl = `https://api.apify.com/v2/datasets/${datasetId}/items?format=json&clean=true`;
-      
-      console.log('[VPN Data] Fetching from:', apiUrl);
+      const apiToken = process.env.NEXT_PUBLIC_APIFY_API_TOKEN || '';
+      const apiUrl = `https://api.apify.com/v2/datasets/${datasetId}/items?format=json&clean=true${apiToken ? `&token=${apiToken}` : ''}`;      console.log('[VPN Data] Fetching from:', apiUrl);
       const response = await fetch(apiUrl);
       
       // Check if response is OK
