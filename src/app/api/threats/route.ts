@@ -6,12 +6,17 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const country = searchParams.get('country') || 'ALL';
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '0');
+    const country = url.searchParams.get('country') || 'ALL';
+    const pageSize = 1000;
+    
+    const start = page * pageSize;
+    const end = start + pageSize - 1;
 
     let query = supabase
       .from('threats')
-      .select('*')
+      .select('*', { count: 'exact' })
       .order('last_updated', { ascending: false });
 
     // Filter by country if specified
@@ -19,18 +24,24 @@ export async function GET(request: Request) {
       query = query.eq('country', country);
     }
 
-    const { data, error } = await query;
+    const { data, error, count } = await query.range(start, end);
 
     if (error) {
       console.error('Supabase error:', error);
       throw new Error(`Supabase query failed: ${error.message}`);
     }
 
-    return Response.json(data || []);
-  } catch (error) {
-    console.error('API error:', error);
+    return Response.json({
+      data: data || [],
+      page,
+      pageSize,
+      total: count || 0,
+      hasMore: (start + pageSize) < (count || 0)
+    });
+  } catch (err) {
+    console.error('API error:', err);
     return Response.json(
-      { error: 'Failed to fetch threats data' },
+      { error: err instanceof Error ? err.message : 'Failed to fetch threats' },
       { status: 500 }
     );
   }
