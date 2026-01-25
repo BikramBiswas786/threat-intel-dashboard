@@ -44,20 +44,37 @@ export default function DashboardPage() {
     fetchVPNData();
   }, []);
 
-  const fetchVPNData = async () => {
+    const fetchVPNData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-                'https://api.apify.com/v2/datasets/zD9mCVWiKxPAjq5haE/items?format=json&clean=true'
-      );
+      // Use environment variable or fallback to a default dataset
+      const datasetId = process.env.NEXT_PUBLIC_APIFY_DATASET_ID || 'zO9mCVWlKxPd5qhaE';
+      const apiUrl = `https://api.apify.com/v2/datasets/${datasetId}/items?format=json&clean=true`;
+      
+      console.log('[VPN Data] Fetching from:', apiUrl);
+      const response = await fetch(apiUrl);
+      
+      // Check if response is OK
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
+      
+      // Check if data is an error object
+      if (data.error) {
+        throw new Error(data.message || 'Dataset not found');
+      }
+      
       console.log('[VPN Data] Loaded:', data.length, 'records');
-      setVpnData(data || []);
+      setVpnData(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('[VPN Data] Error:', error);
+      alert(`Failed to load VPN data: ${error.message}\n\nPlease check:\n1. Dataset ID is correct\n2. Dataset exists in Apify\n3. Network connection is working`);
+      setVpnData([]);
     }
     setLoading(false);
-  };
+  };};
 
   const filteredData = vpnData.filter(item => {
     const statusMatch = item.status === activeTab;
