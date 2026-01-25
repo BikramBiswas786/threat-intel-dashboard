@@ -1,254 +1,315 @@
 'use client';
-import { useState, useEffect } from 'react';
 
-interface VPNData {
+import { useState, useEffect } from 'react';
+import { ChevronDown } from 'lucide-react';
+
+interface VPNThreat {
   tool: string;
   country: string;
   countryCode: string;
   status: 'BLOCKED' | 'WORKING' | 'ANOMALY';
   confidenceScore: number;
-  method?: string;
-  source: string;
+  method: string | string[];
+  source: string | string[];
   lastChecked: string;
-  recommendation?: string;
+  recommendation: string;
 }
 
-const COUNTRIES = [
-  { code: 'CN', name: 'China' },
-  { code: 'RU', name: 'Russia' },
-  { code: 'IR', name: 'Iran' },
-  { code: 'TR', name: 'Turkey' },
-  { code: 'AE', name: 'UAE' },
-  { code: 'IN', name: 'India' },
-  { code: 'US', name: 'United States' },
-  { code: 'GB', name: 'United Kingdom' },
-  { code: 'SY', name: 'Syria' },
-  { code: 'CU', name: 'Cuba' },
-  { code: 'VN', name: 'Vietnam' },
-  { code: 'TH', name: 'Thailand' },
-];
+export default function Dashboard() {
+  const [vpnData, setVpnData] = useState<VPNThreat[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState('ALL');
+  const [selectedTool, setSelectedTool] = useState('ALL');
+  const [selectedStatus, setSelectedStatus] = useState('ALL');
 
-const VPN_TOOLS = [
-  'nymvpn', 'tor', 'protonvpn', 'nordvpn', 'expressvpn', 
-  'surfshark', 'mullvad', 'windscribe', 'ipvanish', 'cyberghost'
-];
-
-export default function DashboardPage() {
-  const [vpnData, setVpnData] = useState<VPNData[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
-  const [selectedTools, setSelectedTools] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<'BLOCKED' | 'ANOMALY' | 'WORKING'>('BLOCKED');
-
+  // Fetch data from backend API endpoint instead of Apify directly
   useEffect(() => {
-    fetchVPNData();
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // ✅ FIX #1: Use your backend API endpoint instead of Apify
+        const response = await fetch('/api/threats');
+
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        // ✅ FIX #2: Extract data using fallback chain (handles multiple API formats)
+        const vpnRecords = data.data || data.threats || [];
+
+        if (!Array.isArray(vpnRecords)) {
+          throw new Error('Invalid API response format');
+        }
+
+        // ✅ FIX #3: Map database fields to component interface
+        const processedData = vpnRecords.map((item: any) => ({
+          tool: item.tool_name || item.tool_id || 'Unknown',
+          country: item.country || 'Unknown',
+          countryCode: item.country || 'Unknown',
+          status: item.blocked ? 'BLOCKED' : item.anomaly ? 'ANOMALY' : 'WORKING',
+          confidenceScore: (item.confidence || 0) * 100,
+          method: Array.isArray(item.methods) ? item.methods : item.method || 'Unknown',
+          source: Array.isArray(item.sources) ? item.sources : item.source || 'Unknown',
+          lastChecked: item.last_updated || item.timestamp || new Date().toISOString(),
+          recommendation: item.recommendation || (item.blocked ? 'Use alternative VPN' : 'Tool working normally')
+        }));
+
+        setVpnData(processedData);
+        setError(null);
+
+      } catch (err) {
+        console.error('Failed to fetch VPN data:', err);
+        const message = err instanceof Error ? err.message : 'Failed to load VPN data';
+        setError(message);
+        setVpnData([]);
+
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
-  const fetchVPNData = async () => {
-    setLoading(true);
-    try {
-      // Use environment variable or fallback to a default dataset
-      const datasetId = process.env.NEXT_PUBLIC_APIFY_DATASET_ID || 'zO9mCVWlKxPd5qhaE';
-      const apiToken = process.env.NEXT_PUBLIC_APIFY_API_TOKEN || '';
-      const apiUrl = `https://api.apify.com/v2/datasets/${datasetId}/items?format=json&clean=true${apiToken ? `&token=${apiToken}` : ''}`;
-      
-      console.log('[VPN Data] Fetching from:', apiUrl);
-      const response = await fetch(apiUrl);
-      
-      // Check if response is OK
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // Check if data is an error object
-      if (data.error) {
-        throw new Error(data.message || 'Dataset not found');
-      }
-      
-      console.log('[VPN Data] Loaded:', data.length, 'records');
-      
-      // Extract VPN data safely with fallback chain
-      const vpnList = data?.data || data?.threats || [];
-      
-      // Validate it's actually an array
-      if (Array.isArray(vpnList)) {
-        setVpnData(vpnList);
-      } else {
-        console.warn('Invalid VPN data structure:', data);
-        setVpnData([]);
-      }
-      
-    } catch (error) {
-      console.error('[VPN Data] Error:', error);
-      setVpnData([]);
-    }
-    setLoading(false);
-  };
+  // Get unique values for filters
+  const countries = Array.from(
+    new Set(vpnData.map(item => item.countryCode))
+  ).sort();
 
+  const tools = Array.from(
+    new Set(vpnData.map(item => item.tool))
+  ).sort();
+
+  const statuses = ['BLOCKED', 'ANOMALY', 'WORKING'];
+
+  // Filter data based on selections
   const filteredData = vpnData.filter(item => {
-    const statusMatch = item.status === activeTab;
-    const countryMatch = selectedCountries.length === 0 || selectedCountries.includes(item.countryCode);
-    const toolMatch = selectedTools.length === 0 || selectedTools.includes(item.tool.toLowerCase());
-    return statusMatch && countryMatch && toolMatch;
+    const matchCountry = selectedCountry === 'ALL' || item.countryCode === selectedCountry;
+    const matchTool = selectedTool === 'ALL' || item.tool === selectedTool;
+    const matchStatus = selectedStatus === 'ALL' || item.status === selectedStatus;
+    return matchCountry && matchTool && matchStatus;
   });
 
-  const blockedCount = vpnData.filter(d => d.status === 'BLOCKED').length;
-  const anomalyCount = vpnData.filter(d => d.status === 'ANOMALY').length;
-  const workingCount = vpnData.filter(d => d.status === 'WORKING').length;
+  // Calculate statistics
+  const stats = {
+    blocked: vpnData.filter(item => item.status === 'BLOCKED').length,
+    anomaly: vpnData.filter(item => item.status === 'ANOMALY').length,
+    working: vpnData.filter(item => item.status === 'WORKING').length,
+  };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-700 text-white p-8">
-        <h1 className="text-4xl font-bold mb-2">🛡️ VPN Censorship Intelligence</h1>
-        <p className="text-purple-100">Real-time VPN blocking data from 13 sources • 195 countries • 35+ tools tracked</p>
-      </div>
-
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Filter Panel */}
-        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4 text-slate-100">🔍 Filters</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Countries */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-300 mb-3">Countries</label>
-              <select
-                multiple
-                value={selectedCountries}
-                onChange={(e) => setSelectedCountries(Array.from(e.target.selectedOptions, o => o.value))}
-                className="w-full border border-gray-600 bg-slate-700 text-white rounded-lg p-3 text-sm focus:ring-2 focus:ring-purple-500 min-h-[140px]"
-              >
-                {COUNTRIES.map(c => (
-                  <option key={c.code} value={c.code}>{c.name} ({c.code})</option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-400 mt-2">Ctrl+Click to select multiple</p>
-            </div>
-
-            {/* VPN Tools */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-300 mb-3">VPN Tools</label>
-              <select
-                multiple
-                value={selectedTools}
-                onChange={(e) => setSelectedTools(Array.from(e.target.selectedOptions, o => o.value))}
-                className="w-full border border-gray-600 bg-slate-700 text-white rounded-lg p-3 text-sm focus:ring-2 focus:ring-purple-500 min-h-[140px]"
-              >
-                {VPN_TOOLS.map(tool => (
-                  <option key={tool} value={tool}>{tool.toUpperCase()}</option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-400 mt-2">Ctrl+Click to select multiple</p>
-            </div>
-
-            {/* Action */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-300 mb-3">Action</label>
-              <button
-                onClick={fetchVPNData}
-                disabled={loading}
-                className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-              >
-                {loading ? '⏳ Loading...' : '📊 Refresh Data'}
-              </button>
-              <p className="text-xs text-gray-400 mt-2">Total: {vpnData.length} records</p>
-              <p className="text-xs text-gray-400">Filtered: {filteredData.length} results</p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-2">
+            🔐 VPN Censorship Intelligence
+          </h1>
+          <p className="text-slate-300">
+            Real-time monitoring of 35+ VPN tools across 195 countries
+          </p>
         </div>
 
-        {/* Status Tabs */}
-        <div className="flex gap-4 mb-6 border-b border-slate-700">
-          {['BLOCKED', 'ANOMALY', 'WORKING'].map(tab => {
-            const count = tab === 'BLOCKED' ? blockedCount : tab === 'ANOMALY' ? anomalyCount : workingCount;
-            return (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab as any)}
-                className={`px-4 py-2 font-bold text-sm transition-colors ${
-                  activeTab === tab
-                    ? tab === 'BLOCKED'
-                      ? 'border-b-4 border-red-600 text-red-400'
-                      : tab === 'ANOMALY'
-                      ? 'border-b-4 border-orange-600 text-orange-400'
-                      : 'border-b-4 border-green-600 text-green-400'
-                    : 'text-gray-400 hover:text-slate-100'
-                }`}
-              >
-                {tab === 'BLOCKED' ? '🔴' : tab === 'ANOMALY' ? '🟠' : '🟢'} {tab} ({count})
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Data Table */}
-        {filteredData.length > 0 ? (
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead className="bg-slate-700 text-slate-200">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-bold">🛡️ VPN Tool</th>
-                    <th className="px-4 py-3 text-left font-bold">🌍 Country</th>
-                    <th className="px-4 py-3 text-left font-bold">📍 Status</th>
-                    <th className="px-4 py-3 text-left font-bold">🎯 Confidence</th>
-                    <th className="px-4 py-3 text-left font-bold">🔍 Method</th>
-                    <th className="px-4 py-3 text-left font-bold">📡 Source</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.slice(0, 500).map((item, i) => (
-                    <tr key={i} className="border-b border-slate-700 hover:bg-slate-700/50">
-                      <td className="px-4 py-3 font-mono text-purple-400">{item.tool?.toUpperCase() || 'N/A'}</td>
-                      <td className="px-4 py-3 text-slate-300">{item.country || 'Unknown'} ({item.countryCode || ''})</td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                          item.status === 'BLOCKED'
-                            ? 'bg-red-900 text-red-300'
-                            : item.status === 'ANOMALY'
-                            ? 'bg-orange-900 text-orange-300'
-                            : 'bg-green-900 text-green-300'
-                        }`}>
-                          {item.status === 'BLOCKED' ? '🔴 BLOCKED' : item.status === 'ANOMALY' ? '🟠 ANOMALY' : '🟢 WORKING'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 bg-slate-700 rounded-full h-2 max-w-[100px]">
-                            <div
-                              className={`h-2 rounded-full ${
-                                (item.confidenceScore || 0) >= 80
-                                  ? 'bg-green-500'
-                                  : (item.confidenceScore || 0) >= 50
-                                  ? 'bg-yellow-500'
-                                  : 'bg-red-500'
-                              }`}
-                              style={{ width: `${item.confidenceScore || 0}%` }}
-                            />
-                          </div>
-                          <span className="text-slate-300 text-xs">{item.confidenceScore || 0}%</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-slate-400 text-xs">{item.method || 'N/A'}</td>
-                      <td className="px-4 py-3 text-slate-400 text-xs">{item.source || 'N/A'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-slate-300">⏳ Loading VPN censorship data...</p>
             </div>
-          </div>
-        ) : (
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-lg p-12 text-center text-slate-400">
-            {loading ? '⏳ Loading VPN data...' : '❌ No VPN data found. Click Refresh Data button.'}
           </div>
         )}
 
-        {filteredData.length > 500 && (
-          <div className="mt-4 p-4 bg-yellow-900/30 border border-yellow-600 rounded-lg text-yellow-300 text-sm">
-            ⚠️ Showing first 500 of {filteredData.length} results
+        {/* Error State */}
+        {error && !loading && (
+          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 mb-6">
+            <p className="text-red-200">⚠️ Error: {error}</p>
+            <p className="text-red-200 text-sm mt-1">
+              Please check your internet connection and refresh the page.
+            </p>
+          </div>
+        )}
+
+        {/* Success State */}
+        {!loading && !error && vpnData.length > 0 && (
+          <>
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
+                <p className="text-slate-400 text-sm mb-1">Total Records</p>
+                <p className="text-3xl font-bold text-white">{vpnData.length}</p>
+              </div>
+              <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
+                <p className="text-red-300 text-sm mb-1">🔴 Blocked</p>
+                <p className="text-3xl font-bold text-red-300">{stats.blocked}</p>
+              </div>
+              <div className="bg-yellow-500/10 border border-yellow-500/50 rounded-lg p-4">
+                <p className="text-yellow-300 text-sm mb-1">⚠️ Anomalies</p>
+                <p className="text-3xl font-bold text-yellow-300">{stats.anomaly}</p>
+              </div>
+              <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-4">
+                <p className="text-green-300 text-sm mb-1">✅ Working</p>
+                <p className="text-3xl font-bold text-green-300">{stats.working}</p>
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Country Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Country
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={selectedCountry}
+                      onChange={(e) => setSelectedCountry(e.target.value)}
+                      className="w-full appearance-none bg-slate-600 text-white px-4 py-2 rounded border border-slate-500 focus:outline-none focus:border-blue-500"
+                    >
+                      <option value="ALL">All Countries ({countries.length})</option>
+                      {countries.map(country => (
+                        <option key={country} value={country}>
+                          {country}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Tool Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    VPN Tool
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={selectedTool}
+                      onChange={(e) => setSelectedTool(e.target.value)}
+                      className="w-full appearance-none bg-slate-600 text-white px-4 py-2 rounded border border-slate-500 focus:outline-none focus:border-blue-500"
+                    >
+                      <option value="ALL">All Tools ({tools.length})</option>
+                      {tools.map(tool => (
+                        <option key={tool} value={tool}>
+                          {tool}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Status Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Status
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value)}
+                      className="w-full appearance-none bg-slate-600 text-white px-4 py-2 rounded border border-slate-500 focus:outline-none focus:border-blue-500"
+                    >
+                      <option value="ALL">All Status</option>
+                      {statuses.map(status => (
+                        <option key={status} value={status}>
+                          {status} ({vpnData.filter(item => item.status === status).length})
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Table */}
+            <div className="bg-slate-700/50 border border-slate-600 rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-slate-600 border-b border-slate-500">
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Tool</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Country</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Status</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Confidence</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Method</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-200">Last Checked</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredData.length > 0 ? (
+                      filteredData.map((item, idx) => (
+                        <tr
+                          key={`${item.tool}-${item.country}-${idx}`}
+                          className="border-b border-slate-600 hover:bg-slate-600/50 transition-colors"
+                        >
+                          <td className="px-6 py-4">
+                            <span className="font-medium text-slate-100">{item.tool}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-slate-300">{item.countryCode}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span
+                              className={`px-3 py-1 rounded text-sm font-medium ${
+                                item.status === 'BLOCKED'
+                                  ? 'bg-red-500/20 text-red-300'
+                                  : item.status === 'ANOMALY'
+                                  ? 'bg-yellow-500/20 text-yellow-300'
+                                  : 'bg-green-500/20 text-green-300'
+                              }`}
+                            >
+                              {item.status === 'BLOCKED' && '🔴'} {item.status === 'ANOMALY' && '⚠️'} {item.status === 'WORKING' && '✅'} {item.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-slate-300">{item.confidenceScore.toFixed(1)}%</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-slate-300 text-sm">
+                              {Array.isArray(item.method) ? item.method.join(', ') : item.method}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-slate-400 text-sm">
+                              {new Date(item.lastChecked).toLocaleDateString()}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-8 text-center">
+                          <p className="text-slate-400">No records match your filters</p>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Footer Stats */}
+            <div className="mt-6 text-center text-slate-400 text-sm">
+              <p>
+                Showing {filteredData.length} of {vpnData.length} records
+              </p>
+            </div>
+          </>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && vpnData.length === 0 && (
+          <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-12 text-center">
+            <p className="text-slate-400 mb-4">No VPN censorship data found</p>
+            <p className="text-slate-500 text-sm">
+              The backend API might not have data yet. Check your Apify sync status.
+            </p>
           </div>
         )}
       </div>
