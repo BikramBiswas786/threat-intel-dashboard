@@ -10,13 +10,13 @@ export async function GET(request: Request) {
     const country = searchParams.get('country') || 'ALL';
 
     let query = supabase
-      .from('vpn_threats')
+      .from('threats')
       .select('*')
       .order('last_updated', { ascending: false });
 
     // Filter by country if specified
     if (country && country !== 'ALL') {
-      query = query.eq('country_code', country);
+      query = query.eq('country', country);
     }
 
     const { data, error } = await query;
