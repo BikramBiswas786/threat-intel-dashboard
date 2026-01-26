@@ -439,4 +439,20 @@ export default function VPNCensorshipDashboard() {
                 <TrendingUp className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-semibold text-white mb-2">Data Sources & Methodology</h4>
-                  <p className="text-sm text-slate-4
+                  <p className="text-sm text-slate-400">
+                    Aggregated data from 50+ independent sources including Freedom House, OONI,
+                    Netblocks, Citizen Lab, and regional monitors
+                  </p>
+                  <p className="text-xs text-slate-500 mt-2">
+                    Last comprehensive update: January 26, 2026 • Data accuracy: 42%-99%
+                    confidence depending on country
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
